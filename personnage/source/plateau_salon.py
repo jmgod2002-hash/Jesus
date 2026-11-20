@@ -120,8 +120,8 @@ def scene():
          '<ellipse cx="1050" cy="840" rx="40" ry="40" fill="#FFB860" opacity=".45" filter="url(#sl_b10)"/>'
          '<path d="M1037 836 C1043 846 1043 852 1037 856 C1031 852 1031 846 1037 836 Z" fill="#FFD27A"/><path d="M1067 850 C1072 858 1072 862 1067 866 C1062 862 1062 858 1067 850 Z" fill="#FFD27A"/>',
          f'<path d="M830 868 L872 868 L870 896 C868 900 834 900 832 896 Z" fill="#1E140D"/><g transform="translate(843 873) scale(.03)" fill="#F5EDE0" fill-rule="evenodd"><path d="{torch}"/><path d="{flame}"/></g>',
-         f'<g transform="translate(1590 40) scale(.045)" fill="#FFF6E8" opacity=".9"><path d="{NOM_D}"/></g>',
-         '<rect width="1920" height="1080" fill="url(#sl_vig)"/>']
+         '<rect width="1920" height="1080" fill="url(#sl_vig)"/>',
+f'<g transform="translate(1590 64) scale(.045)" fill="#FFF6E8"><path d="{NOM_D}"/></g>']
     return "\n".join(o)
 
 if __name__ == "__main__":

@@ -121,8 +121,8 @@ def scene():
          micro(668, 572, 20, "M700 590 L770 690 L820 834"),
          bureau(),
          ampoule(110, 640, 850),
-         f'<g transform="translate(1590 40) scale(.045)" fill="#FFF6E8" opacity=".9"><path d="{NOM_D}"/></g>',
-         '<rect width="1920" height="1080" fill="url(#n_vig)"/>']
+         '<rect width="1920" height="1080" fill="url(#n_vig)"/>',
+f'<g transform="translate(1590 64) scale(.045)" fill="#FFF6E8"><path d="{NOM_D}"/></g>']
     return "\n".join(o)
 
 if __name__ == "__main__":
