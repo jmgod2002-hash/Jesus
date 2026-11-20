@@ -4,7 +4,7 @@
 const { chromium } = require("playwright");
 const fs = require("fs"), path = require("path"), { execFileSync } = require("child_process");
 
-const ROOT = __dirname, OUT = path.join(ROOT, "renders"), DUR = 6.5, FPS = 30, SUB = 2, WORKERS = 4;
+const ROOT = __dirname, OUT = path.join(ROOT, "renders"), DUR = 6, FPS = 30, SUB = 3, WORKERS = 4;
 const STILLS = process.argv.includes("--stills");
 
 async function openPage(browser) {
@@ -43,7 +43,7 @@ const shot = async (page, t, file) => { await page.evaluate((tt) => window.seek(
   await browser.close();
   // fondu des 3 sous-images de chaque image → flou de mouvement, puis 60 i/s + son
   execFileSync("ffmpeg", ["-v", "error", "-y", "-framerate", String(FPS * SUB), "-i", path.join(dir, "f%05d.jpg"), "-i", path.join(OUT, "bande-son.wav"),
-    "-vf", `tmix=frames=${SUB}:weights='1 1',select='eq(mod(n\\,${SUB})\\,${SUB - 1})',setpts=N/(${FPS}*TB)`, "-r", String(FPS),
+    "-vf", `tmix=frames=${SUB}:weights='1 1 1',select='eq(mod(n\\,${SUB})\\,${SUB - 1})',setpts=N/(${FPS}*TB)`, "-r", String(FPS),
     "-c:v", "libx264", "-preset", "slow", "-crf", "15", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "256k", "-shortest", path.join(OUT, "intro.mp4")], { stdio: "inherit" });
   fs.rmSync(dir, { recursive: true, force: true });
   console.log("OK →", path.join(OUT, "intro.mp4"), `(${((Date.now() - t0) / 1000).toFixed(0)} s)`);
