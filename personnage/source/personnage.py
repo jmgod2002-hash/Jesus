@@ -164,11 +164,22 @@ def hair():
     p.append(f'<path d="M214 150 C218 128 228 108 244 92" stroke="{L}" stroke-width="5" fill="none" stroke-linecap="round"/>')
     return "\n".join(p)
 
-def eyes_glasses():
+def iris(cx, cy, cam):
+    ix, iy = (cx + 1, cy + 3) if cam else (cx + 9, cy - 12)   # caméra : regard droit vers le spectateur
+    return (f'<circle cx="{ix}" cy="{iy}" r="19" fill="url(#irisG)"/>'
+            + f'<circle cx="{ix}" cy="{iy}" r="19" fill="none" stroke="#2A170B" stroke-width="2"/>'
+            + f'<circle cx="{ix+1}" cy="{iy-1}" r="10" fill="#140B05"/>'
+            + f'<circle cx="{ix+7}" cy="{iy-8}" r="6" fill="#fff"/><circle cx="{ix-6}" cy="{iy+9}" r="3" fill="#fff" opacity=".9"/>')
+
+def eyes_glasses(regard="haut"):
     k = K; p = []
-    # sourcils (l'un relevé)
+    cam = regard == "camera"
+    # sourcils (l'un relevé ; les deux au même niveau quand il regarde la caméra)
     p.append(f'<path d="M200 248 C218 228 252 222 280 232 C284 238 280 244 272 242 C250 236 228 240 210 252 C202 256 196 252 200 248 Z" fill="{k["hair"]}" stroke="{L}" stroke-width="3"/>')
-    p.append(f'<path d="M322 222 C350 198 386 198 404 212 C408 218 404 224 396 222 C378 214 352 216 330 232 C322 236 316 230 322 222 Z" fill="{k["hair"]}" stroke="{L}" stroke-width="3"/>')
+    if cam:
+        p.append(f'<path d="M400 248 C382 228 348 222 320 232 C316 238 320 244 328 242 C350 236 372 240 390 252 C398 256 404 252 400 248 Z" fill="{k["hair"]}" stroke="{L}" stroke-width="3"/>')
+    else:
+        p.append(f'<path d="M322 222 C350 198 386 198 404 212 C408 218 404 224 396 222 C378 214 352 216 330 232 C322 236 316 230 322 222 Z" fill="{k["hair"]}" stroke="{L}" stroke-width="3"/>')
     # ombre des montures sur les joues
     p.append(blur(f'<path d="M200 346 C230 356 270 354 296 344 M306 344 C336 354 376 354 404 344" stroke="#5A3420" stroke-width="8" fill="none" opacity=".35"/>', 5))
     for cx, cy, cid in ((248, 292, "eL"), (352, 290, "eR")):
@@ -177,10 +188,7 @@ def eyes_glasses():
         p.append(f'<ellipse cx="{cx}" cy="{cy}" rx="30" ry="36" fill="#FFFFFF"/>')
         p.append(f'<g clip-path="url(#{cid})">'
                  + blur(f'<ellipse cx="{cx}" cy="{cy-32}" rx="40" ry="18" fill="#D9C8B4"/>', 4)
-                 + f'<circle cx="{cx+9}" cy="{cy-12}" r="19" fill="url(#irisG)"/>'
-                 + f'<circle cx="{cx+9}" cy="{cy-12}" r="19" fill="none" stroke="#2A170B" stroke-width="2"/>'
-                 + f'<circle cx="{cx+10}" cy="{cy-13}" r="10" fill="#140B05"/>'
-                 + f'<circle cx="{cx+16}" cy="{cy-20}" r="6" fill="#fff"/><circle cx="{cx+3}" cy="{cy-3}" r="3" fill="#fff" opacity=".9"/></g>')
+                 + iris(cx, cy, cam) + '</g>')
         p.append(f'<ellipse cx="{cx}" cy="{cy}" rx="30" ry="36" fill="none" stroke="{L}" stroke-width="3.5"/>')
         p.append(f'<path d="M{cx-31} {cy-2} C{cx-25} {cy-36} {cx+23} {cy-40} {cx+31} {cy-8}" stroke="{L}" stroke-width="8" fill="none" stroke-linecap="round"/>')
         p.append(f'<path d="M{cx+28} {cy-12} L{cx+36} {cy-18}" stroke="{L}" stroke-width="5" stroke-linecap="round"/>')
@@ -200,8 +208,12 @@ def eyes_glasses():
     p.append(f'<path d="M306 312 C318 330 322 346 310 354 C304 358 296 357 291 352" stroke="{k["skinD"]}" stroke-width="5" fill="none" stroke-linecap="round"/>')
     p.append(blur(f'<ellipse cx="296" cy="340" rx="7" ry="5" fill="{k["skinL"]}" opacity=".9"/>', 2))
     # bouche (pincée : il réfléchit)
-    p.append(f'<path d="M278 390 C292 382 312 382 326 391" stroke="{L}" stroke-width="6" fill="none" stroke-linecap="round"/>')
-    p.append(f'<path d="M326 391 L331 386" stroke="{L}" stroke-width="4" stroke-linecap="round"/>')
+    if cam:   # léger sourire, assuré
+        p.append(f'<path d="M278 380 C292 390 312 390 326 379" stroke="{L}" stroke-width="6" fill="none" stroke-linecap="round"/>')
+        p.append(f'<path d="M274 382 L279 379 M330 377 L325 381" stroke="{L}" stroke-width="4" stroke-linecap="round"/>')
+    else:
+        p.append(f'<path d="M278 390 C292 382 312 382 326 391" stroke="{L}" stroke-width="6" fill="none" stroke-linecap="round"/>')
+        p.append(f'<path d="M326 391 L331 386" stroke="{L}" stroke-width="4" stroke-linecap="round"/>')
     p.append(f'<path d="M292 402 C302 406 312 404 318 400" stroke="{k["skinS"]}" stroke-width="4" fill="none" stroke-linecap="round"/>')
     return "\n".join(p)
 
@@ -237,10 +249,10 @@ DEFS = f'''<defs>
  <radialGradient id="irisG" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#A9743F"/><stop offset=".7" stop-color="#5E3A1E"/><stop offset="1" stop-color="#3A2110"/></radialGradient>
 </defs>'''
 
-def build():
+def build(regard="haut"):
     _n[0] = 0
     body, torch, flame = character()
-    return DEFS + "\n" + body + "\n" + head() + "\n" + hair() + "\n" + eyes_glasses() + "\n" + chin_hand()
+    return DEFS + "\n" + body + "\n" + head() + "\n" + hair() + "\n" + eyes_glasses(regard) + "\n" + chin_hand()
 
 if __name__ == "__main__":
     out = os.path.join(ROOT, "personnage/presentateur.svg")
