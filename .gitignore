@@ -1,1 +1,3 @@
 __pycache__/
+analyses-video/**/audio.*
+analyses-video/**/video.*
