@@ -29,13 +29,37 @@ def zone(path, inner, outline=True, fill=None):
 def blur(shape, b):  # forme floue (ombrage doux)
     return shape.replace('/>', f' filter="url(#b{b})"/>', 1)
 
-def character():
+def seated_legs():
+    """Jambes assises vues de face : tibias, chaussures pointe vers nous, cuisses en raccourci."""
+    k = K; p = []
+    for x0, x1, xe0, xe1 in ((210, 286, 216, 280), (314, 390, 320, 384)):
+        shin = f"M{x0} 812 L{x1} 812 L{xe1} 934 L{xe0} 934 Z"
+        p.append(zone(shin, blur(f'<rect x="{x1-26}" y="800" width="40" height="150" fill="{k["pantsS"]}" opacity=".85"/>', 8)
+                      + blur(f'<rect x="{x0-8}" y="800" width="20" height="150" fill="{k["pantsL"]}" opacity=".6"/>', 6)
+                      + blur(f'<rect x="{x0-10}" y="806" width="{x1-x0+20}" height="26" fill="#000" opacity=".6"/>', 8)
+                      + f'<path d="M{x0+14} 904 C{x0+30} 912 {x1-30} 912 {x1-12} 904" stroke="{k["pantsS"]}" stroke-width="4" fill="none" stroke-linecap="round"/>',
+                      fill=k['pants']))
+    for sx in (206, 310):
+        shoe = f"M{sx} 926 L{sx+84} 926 C{sx+96} 940 {sx+96} 962 {sx+80} 972 L{sx+4} 972 C{sx-12} 962 {sx-12} 940 {sx} 926 Z"
+        p.append(zone(shoe, blur(f'<rect x="{sx-20}" y="958" width="130" height="20" fill="#000" opacity=".6"/>', 4)
+                      + blur(f'<ellipse cx="{sx+34}" cy="940" rx="22" ry="7" fill="#fff" opacity=".45"/>', 3), fill=k['shoe']))
+    for x0, x1 in ((196, 298), (302, 404)):
+        th = f"M{x0} 736 L{x1} 736 L{x1-2} 806 C{x1-16} 828 {x0+18} 828 {x0+4} 806 Z"
+        p.append(zone(th, blur(f'<rect x="{x1-30}" y="730" width="44" height="110" fill="{k["pantsS"]}" opacity=".8"/>', 8)
+                      + blur(f'<ellipse cx="{(x0+x1)//2-8}" cy="806" rx="30" ry="12" fill="{k["pantsL"]}" opacity=".9"/>', 6),
+                      fill=k['pants']))
+    return p
+
+def character(posture="debout"):
     torch, flame = logo_parts()
     k = K
     p = []
-    p.append(f'<ellipse cx="300" cy="976" rx="190" ry="20" fill="#000" opacity=".32" filter="url(#b10)"/>')
+    if posture == "assis":
+        p.extend(seated_legs())
+    else:
+        p.append(f'<ellipse cx="300" cy="976" rx="190" ry="20" fill="#000" opacity=".32" filter="url(#b10)"/>')
     # --- jambes ---
-    for x0, x1, xs in ((206, 296, 262), (304, 394, 358)):
+    for x0, x1, xs in (((206, 296, 262), (304, 394, 358)) if posture != "assis" else ()):
         leg = f"M{x0} 748 L{x1} 748 L{x1-4} 928 C{x1-24} 935 {x0+20} 935 {x0+4} 928 Z"
         p.append(zone(leg, blur(f'<rect x="{xs}" y="740" width="60" height="200" fill="{k["pantsS"]}" opacity=".85"/>', 10)
                  + blur(f'<rect x="{x0-10}" y="740" width="28" height="200" fill="{k["pantsL"]}" opacity=".7"/>', 8)
@@ -45,7 +69,7 @@ def character():
                  fill=k['pants']))
     # --- chaussures ---
     for sh, hx in (("M210 922 L292 922 C302 944 294 970 262 972 L190 972 C166 972 160 948 182 936 C192 929 200 925 210 922 Z", 206),
-                   ("M308 922 L390 922 C400 925 408 929 418 936 C440 948 434 972 410 972 L338 972 C306 970 298 944 308 922 Z", 394)):
+                   ("M308 922 L390 922 C400 925 408 929 418 936 C440 948 434 972 410 972 L338 972 C306 970 298 944 308 922 Z", 394)) if posture != "assis" else ():
         p.append(zone(sh, blur(f'<rect x="150" y="955" width="300" height="30" fill="#000" opacity=".6"/>', 4)
                  + blur(f'<ellipse cx="{hx}" cy="941" rx="24" ry="7" fill="#fff" opacity=".45"/>', 3)
                  + f'<path d="M150 961 L450 961" stroke="#0E0805" stroke-width="5"/>', fill=k['shoe']))
@@ -249,9 +273,9 @@ DEFS = f'''<defs>
  <radialGradient id="irisG" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#A9743F"/><stop offset=".7" stop-color="#5E3A1E"/><stop offset="1" stop-color="#3A2110"/></radialGradient>
 </defs>'''
 
-def build(regard="haut"):
+def build(regard="haut", posture="debout"):
     _n[0] = 0
-    body, torch, flame = character()
+    body, torch, flame = character(posture)
     return DEFS + "\n" + body + "\n" + head() + "\n" + hair() + "\n" + eyes_glasses(regard) + "\n" + chin_hand()
 
 if __name__ == "__main__":
