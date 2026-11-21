@@ -4,6 +4,8 @@
 //   node verset/render.js <épisode> --format long|short_youtube|short_tiktok
 //   node verset/render.js <épisode> --format long --stills 3,40,120      → images de contrôle
 //   node verset/render.js <épisode> --images                             → miniature et couverture seulement
+//   node verset/render.js <épisode> --son [--format ...]                 → le son final seul, pour l'écouter (renders/ecoute_*.mp3)
+//   node verset/render.js <épisode> --son --remux                       → refait le son et le remplace dans les vidéos déjà rendues
 // Son : voix ElevenLabs (voix/*.mp3) traitées « micro podcast » + musique (musique.mp3 si présent, sinon nappe provisoire)
 // baissée automatiquement sous la voix, puis normalisation -14 LUFS (YouTube, TikTok).
 const { chromium } = require("playwright");
@@ -42,6 +44,34 @@ async function images(browser) {
   }
 }
 
+// graphe ffmpeg : entrées (images, musique, intro, voix) et filtres (montage vidéo, chaîne podcast, mixage, -14 LUFS)
+function graphe(C, dir, bed, nAvant) {
+  const musique = ["musique.mp3", "musique.wav", "musique.m4a"].map(m => path.join(EP, m)).find(fs.existsSync);
+  // entrée 0 : les images, ou un silence quand on ne fait que le son
+  const ins = dir ? ["-framerate", String(FPS), "-i", path.join(dir, "f%05d.jpg")] : ["-f", "lavfi", "-t", String(C.dur), "-i", "anullsrc=r=48000:cl=stereo"];
+  ins.push(...(musique ? ["-stream_loop", "-1", "-i", musique] : ["-i", bed]));
+  let k = 2, fc = [];
+  if (C.intro) { ins.push("-i", INTRO); k++; }
+  const voix = C.voix.map(v => ({ ...v, idx: (ins.push("-i", path.join(EP, v.fichier)), k++) }));
+  if (!dir) { /* son seul : pas de vidéo */ }
+  else if (C.intro) {
+    fc.push(`[0:v]split=2[va0][vb0]`, `[va0]trim=end_frame=${nAvant},setpts=PTS-STARTPTS,format=yuv420p[va]`, `[vb0]trim=start_frame=${nAvant},setpts=PTS-STARTPTS,format=yuv420p[vb]`,
+      `[2:v]fps=${FPS},scale=${C.w}:${C.h},setsar=1,format=yuv420p,setpts=PTS-STARTPTS[vi]`, `[va][vi][vb]concat=n=3:v=1:a=0[v]`);
+  } else fc.push(`[0:v]format=yuv420p[v]`);
+  const muet = C.intro ? `,volume='if(between(t,${C.intro.t0},${C.intro.t1}),0,1)':eval=frame` : "";
+  fc.push(`[1:a]atrim=0:${C.dur},asetpts=PTS-STARTPTS,aformat=sample_rates=48000:channel_layouts=stereo,${voix.length ? 'loudnorm=I=-32:TP=-8:LRA=11,' : ''}aformat=sample_rates=48000:channel_layouts=stereo${muet}[mus]`);
+  const mix = [];
+  if (voix.length) {
+    voix.forEach((v, i) => fc.push(`[${v.idx}:a]aformat=sample_rates=48000:channel_layouts=mono,adelay=${Math.round(v.debut * 1000)}:all=1[v${i}]`));
+    fc.push(`${voix.map((_, i) => `[v${i}]`).join("")}amix=inputs=${voix.length}:normalize=0,${PODCAST},loudnorm=I=-16:TP=-1.5:LRA=7,aformat=sample_rates=48000:channel_layouts=stereo,apad,asplit=2[vox][voxsc]`);
+    fc.push(`[mus][voxsc]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=450[musd]`);
+    mix.push("[vox]", "[musd]");
+  } else mix.push("[mus]");
+  if (C.intro) { fc.push(`[2:a]aformat=sample_rates=48000:channel_layouts=stereo,adelay=${Math.round(C.intro.t0 * 1000)}:all=1[ia]`); mix.push("[ia]"); }
+  fc.push(`${mix.join("")}amix=inputs=${mix.length}:normalize=0,atrim=0:${C.dur},loudnorm=I=${voix.length ? -14 : -18}:TP=-1.5:LRA=11[a]`);
+  return { ins, fc };
+}
+
 async function video(browser, fmt) {
   const fichier = path.join(EP, "pages", fmt + ".html");
   const first = await ouvrir(browser, fichier, fmt === "long" ? 1920 : 1080, fmt === "long" ? 1080 : 1920);
@@ -55,13 +85,26 @@ async function video(browser, fmt) {
     console.log("planche →", path.join(dir, "planche.jpg"));
     await first.close(); return;
   }
-  const dir = path.join(TMP, "frames_" + fmt); fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
   // images (on saute le trou réservé à l'intro : elle est insérée telle quelle au montage)
   const temps = [];
   for (let n = 0; n < Math.round(C.dur * FPS); n++) { const t = (n + 0.5) / FPS; if (!(C.intro && t >= C.intro.t0 && t < C.intro.t1)) temps.push(t); }
   const nAvant = C.intro ? temps.filter(t => t < C.intro.t0).length : 0;
-  const bed = path.join(TMP, `fond_${fmt}.wav`);
+  const SON = args.includes("--son"), bed = path.join(TMP, `${SON ? "ecoute_" : ""}fond_${fmt}.wav`);
   fs.writeFileSync(bed, Buffer.from(await first.evaluate(() => window.renderAudio()), "base64"));
+  if (SON) {
+    const g = graphe(C, null, bed, nAvant), wav = path.join(TMP, `ecoute_${fmt}.wav`), mp3 = wav.replace(".wav", ".mp3");
+    ff([...g.ins, "-filter_complex", g.fc.join(";"), "-map", "[a]", "-t", String(C.dur), "-c:a", "pcm_s16le", wav]);
+    ff(["-i", wav, "-c:a", "libmp3lame", "-b:a", "192k", mp3]);
+    // --remux : remplace le son d'une vidéo déjà rendue (image copiée telle quelle)
+    const mp4 = path.join(OUT, NOMS[fmt]);
+    if (args.includes("--remux") && fs.existsSync(mp4)) {
+      const tmp = mp4.replace(".mp4", ".tmp.mp4");
+      ff(["-i", mp4, "-i", wav, "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-movflags", "+faststart", "-t", String(C.dur), tmp]);
+      fs.renameSync(tmp, mp4); console.log("son remplacé →", mp4);
+    }
+    console.log("son →", mp3); await first.close(); return;
+  }
+  const dir = path.join(TMP, "frames_" + fmt); fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
   const pages = [first, ...(await Promise.all(Array.from({ length: WORKERS - 1 }, () => ouvrir(browser, fichier, C.w, C.h))))];
   const t0 = Date.now(); let done = 0;
   await Promise.all(pages.map(async (page, w) => {
@@ -71,28 +114,7 @@ async function video(browser, fmt) {
     }
   }));
   await Promise.all(pages.map(p => p.close()));
-  // montage image + son
-  const musique = ["musique.mp3", "musique.wav", "musique.m4a"].map(m => path.join(EP, m)).find(fs.existsSync);
-  const ins = ["-framerate", String(FPS), "-i", path.join(dir, "f%05d.jpg")];
-  ins.push(...(musique ? ["-stream_loop", "-1", "-i", musique] : ["-i", bed]));
-  let k = 2, fc = [];
-  if (C.intro) { ins.push("-i", INTRO); k++; }
-  const voix = C.voix.map(v => ({ ...v, idx: (ins.push("-i", path.join(EP, v.fichier)), k++) }));
-  if (C.intro) {
-    fc.push(`[0:v]split=2[va0][vb0]`, `[va0]trim=end_frame=${nAvant},setpts=PTS-STARTPTS,format=yuv420p[va]`, `[vb0]trim=start_frame=${nAvant},setpts=PTS-STARTPTS,format=yuv420p[vb]`,
-      `[2:v]fps=${FPS},scale=${C.w}:${C.h},setsar=1,format=yuv420p,setpts=PTS-STARTPTS[vi]`, `[va][vi][vb]concat=n=3:v=1:a=0[v]`);
-  } else fc.push(`[0:v]format=yuv420p[v]`);
-  const muet = C.intro ? `,volume='if(between(t,${C.intro.t0},${C.intro.t1}),0,1)':eval=frame` : "";
-  fc.push(`[1:a]atrim=0:${C.dur},asetpts=PTS-STARTPTS,aformat=sample_rates=48000:channel_layouts=stereo,${voix.length ? 'loudnorm=I=-32:TP=-8:LRA=11,' : ''}aformat=sample_rates=48000:channel_layouts=stereo${muet}[mus]`);
-  const mix = [];
-  if (voix.length) {
-    voix.forEach((v, i) => fc.push(`[${v.idx}:a]aformat=sample_rates=48000:channel_layouts=mono,adelay=${Math.round(v.debut * 1000)}:all=1[v${i}]`));
-    fc.push(`${voix.map((_, i) => `[v${i}]`).join("")}amix=inputs=${voix.length}:normalize=0,${PODCAST},loudnorm=I=-16:TP=-1.5:LRA=7,aformat=sample_rates=48000:channel_layouts=stereo,asplit=2[vox][voxsc]`);
-    fc.push(`[mus][voxsc]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=450[musd]`);
-    mix.push("[vox]", "[musd]");
-  } else mix.push("[mus]");
-  if (C.intro) { fc.push(`[2:a]aformat=sample_rates=48000:channel_layouts=stereo,adelay=${Math.round(C.intro.t0 * 1000)}:all=1[ia]`); mix.push("[ia]"); }
-  fc.push(`${mix.join("")}amix=inputs=${mix.length}:normalize=0,atrim=0:${C.dur},loudnorm=I=${voix.length ? -14 : -18}:TP=-1.5:LRA=11[a]`);
+  const { ins, fc } = graphe(C, dir, bed, nAvant);
   fs.mkdirSync(OUT, { recursive: true });
   const sortie = path.join(OUT, NOMS[fmt]);
   ff([...ins, "-filter_complex", fc.join(";"), "-map", "[v]", "-map", "[a]", "-t", String(C.dur), "-r", String(FPS),
@@ -107,6 +129,6 @@ async function video(browser, fmt) {
   const browser = await chromium.launch();
   if (args.includes("--images")) { await images(browser); await browser.close(); return; }
   for (const fmt of FORMATS) await video(browser, fmt);
-  if (!opt("--stills") && !opt("--format")) await images(browser);
+  if (!opt("--stills") && !opt("--format") && !args.includes("--son")) await images(browser);
   await browser.close();
 })();
