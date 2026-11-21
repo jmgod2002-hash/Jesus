@@ -3,9 +3,11 @@
   "reference": "Psaume 23:4",
   "reference_courte": "PSAUME 23 · 4",
   "traduction": "Louis Segond 1910",
+  "vitesse_voix": 0.9,
+  "respiration": 0.7,
   "verset": "Quand je marche dans la vallée de l'ombre de la mort, je ne crains aucun mal, car tu es avec moi : ta houlette et ton bâton me rassurent.",
   "verset_court": "Quand je marche dans la vallée de l'ombre de la mort, je ne crains aucun mal, car tu es avec moi.",
-  "notes": "Syntaxe des textes : [balise] = direction de jeu ElevenLabs v3 (non affichée) ; {affiché|prononcé} = mot écrit d'une façon à l'écran et d'une autre pour la voix.",
+  "notes": "vitesse_voix : 0,9 = voix ralentie de 10 % au montage (même hauteur) ; vitesse par bloc possible. respiration : silence en fin de bloc (s). Syntaxe des textes : [balise] = direction de jeu ElevenLabs v3 (non affichée) ; {affiché|prononcé} = mot écrit d'une façon à l'écran et d'une autre pour la voix.",
 
   "long": {
     "intro_apres": "01_accroche",
@@ -31,7 +33,7 @@
         "texte": "[warmly] Alors, pour toi, ce soir. [short pause] Peut-être que tu traverses ta propre vallée. Un diagnostic. Une rupture. Un deuil. Une angoisse qui revient chaque nuit. [short pause] Ce verset ne te promet pas que la vallée va disparaître demain. [short pause] Il te promet que tu ne la traverses pas seul. [long pause] Jésus a repris cette image : « Je suis le bon berger. Le bon berger donne sa vie pour ses brebis. » [short pause] Le berger ne regarde pas la vallée de loin. Il y marche avec toi." },
       { "id": "07_cta", "decor": "feu", "plan": "serre", "cta": "youtube", "commentaire": "Tu es avec moi",
         "texte": "[warmly] Si ce verset t'a fait du bien, abonne-toi : chaque jour, un verset, expliqué simplement. [short pause] Et écris en commentaire : « Tu es avec moi. » [long pause] Maintenant… prions ensemble." },
-      { "id": "08_priere", "decor": "chambre", "plan": "large", "chapitre": "Prions ensemble",
+      { "id": "08_priere", "decor": "chambre", "plan": "large", "chapitre": "Prions ensemble", "vitesse": 0.86,
         "texte": "[softly] [slowly] Seigneur… ce soir, je te donne ce qui m'inquiète. [short pause] Tu connais ma vallée mieux que moi. [short pause] Je ne te demande pas de tout comprendre. Je te demande de rester avec moi. [long pause] Sois mon berger cette nuit. Garde mon cœur… et garde ceux que j'aime. [short pause] Donne-moi de dormir en paix, parce que tu es là. [long pause] Au nom de Jésus… amen." },
       { "id": "09_fin", "decor": "chambre", "plan": "fin", "fin": true, "duree_min": 20,
         "texte": "[warmly] [softly] Dors en paix. [short pause] On se retrouve demain pour un nouveau verset. [short pause] Et si tu veux aller plus loin… la vidéo à l'écran est pour toi." }

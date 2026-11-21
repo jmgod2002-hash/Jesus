@@ -78,7 +78,7 @@ def minuter(texte):
 # ---------------------------------------------------------------- sous-titres
 # Lisibilité : un groupe reste au moins ~1,8 s (Short) / ~2,2 s (vidéo longue) à l'écran, coupe de préférence
 # en fin de phrase ou sur une respiration, et ne dépasse pas une ou deux lignes.
-LISIBLE = {True: dict(car=60, mini=2.2), False: dict(car=34, mini=2.0)}
+LISIBLE = {True: dict(car=60, mini=2.2), False: dict(car=44, mini=2.4)}
 
 def grouper(mots, long):
     r = LISIBLE[long]
@@ -174,11 +174,22 @@ def caler(mots, env, d0, d1):
         w["t0"], w["t1"] = float(np.interp(w["t0"], xe, xr)), float(np.interp(w["t1"], xe, xr))
     return len(ancres) - 2, len(coupures)
 
-def chercher_voix(ep_dir, bid):
+def chercher_voix(ep_dir, bid, vitesse=1.0):
+    """Fichier voix du bloc. Si vitesse < 1, version ralentie (même hauteur de voix, étirement Rubber Band)
+    mise en cache dans renders/voix_lente/ ; le fichier d'origine n'est jamais modifié."""
     for ext in (".mp3", ".wav", ".m4a"):
         p = os.path.join(ep_dir, "voix", bid + ext)
-        if os.path.exists(p): return p
-    return None
+        if os.path.exists(p): break
+    else:
+        return None
+    if abs(vitesse - 1) < 0.005:
+        return p
+    lent = os.path.join(ep_dir, "renders", "voix_lente", f"{bid}_{vitesse:.2f}.wav")
+    if not os.path.exists(lent) or os.path.getmtime(lent) < os.path.getmtime(p):
+        os.makedirs(os.path.dirname(lent), exist_ok=True)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", p, "-af", f"rubberband=tempo={vitesse}:formant=preserved:pitchq=quality",
+                        "-ar", "48000", "-c:a", "pcm_s16le", lent], check=True)
+    return lent
 
 
 # ---------------------------------------------------------------- timeline d'un format
@@ -194,7 +205,7 @@ def timeline(ep, ep_dir, fmt):
     chapitres = [b for b in blocs if b.get("chapitre")]
     for b in blocs:
         mots, est = minuter(b["texte"])
-        chemin = chercher_voix(ep_dir, b["id"])
+        chemin = chercher_voix(ep_dir, b["id"], b.get("vitesse", ep.get("vitesse_voix", 1.0)))
         if chemin:
             duree, env, d0, d1 = lire_voix(chemin)
             calees, pauses = caler(mots, env, d0, d1)
@@ -203,7 +214,7 @@ def timeline(ep, ep_dir, fmt):
             voix.append(dict(id=b["id"], fichier=os.path.relpath(chemin, ep_dir), debut=round(t, 3)))
         else:
             env, parlee = None, est
-        fin_pause = b.get("fin_pause", 0.45)
+        fin_pause = b.get("fin_pause", ep.get("respiration", 0.45))
         duree_bloc = max(parlee + fin_pause, b.get("duree_min", 0))
         t0 = t
         # enveloppe globale (100/s) : -1 là où il n'y a pas de vraie voix
@@ -361,7 +372,7 @@ def page_video(ep, ep_dir, fmt):
 <div id="voile" class="couche" style="background:rgba(10,6,4,.62);opacity:0"></div>
 <div id="cv" class="carte" style="left:60px;right:60px;top:520px;padding:44px 48px"><div class="ref" style="font-size:28px;margin-bottom:22px">{ep["reference_courte"]}</div><div class="v serif" style="font-size:62px;line-height:1.18"></div><div class="src" style="font-size:24px;margin-top:22px">{ep["traduction"]}</div></div>
 <div id="carte" class="carte" style="left:70px;right:70px;top:280px;padding:40px 44px;text-align:center"></div>
-<div id="st" class="fort" style="top:1080px;padding:0 50px;font-size:72px;line-height:1.1;color:#fff;text-transform:uppercase;-webkit-text-stroke:3px rgba(0,0,0,.85);paint-order:stroke fill;text-shadow:0 8px 30px rgba(0,0,0,.55)"></div>
+<div id="st" class="fort" style="top:1090px;padding:0 50px;font-size:64px;line-height:1.12;color:#fff;text-transform:uppercase;-webkit-text-stroke:3px rgba(0,0,0,.85);paint-order:stroke fill;text-shadow:0 8px 30px rgba(0,0,0,.55)"></div>
 <div id="com" style="left:120px;right:120px;top:215px;padding:30px 36px;font-size:46px;text-align:center"></div>
 <div id="cta" style="top:1290px;font-size:60px"></div>
 <div id="noir" class="couche"></div>"""
