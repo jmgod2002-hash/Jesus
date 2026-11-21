@@ -50,7 +50,7 @@ def jetons(texte):
             if aff == "«": ouvrant = "« "; continue
             k = next((i for i in range(len(out) - 1, -1, -1) if out[i][0] == "mot"), None)
             if k is not None:
-                prec = out[k]; out[k] = ("mot", prec[1] + " " + aff if aff in "»:;!?" else prec[1] + aff, prec[2])
+                prec = out[k]; out[k] = ("mot", prec[1] + " " + aff if aff[0] in "»:;!?" else prec[1] + aff, prec[2])
             continue
         out.append(("mot", ouvrant + aff, dit)); ouvrant = ""
     return out
@@ -73,6 +73,52 @@ def minuter(texte):
         mots.append(dict(t0=t, t1=t + d, txt=j[1], dit=j[2]))
         t += d + pause_ponct(j[1])
     return mots, t
+
+
+# ---------------------------------------------------------------- sous-titres
+# Lisibilité : un groupe reste au moins ~1,8 s (Short) / ~2,2 s (vidéo longue) à l'écran, coupe de préférence
+# en fin de phrase ou sur une respiration, et ne dépasse pas une ou deux lignes.
+LISIBLE = {True: dict(car=60, mini=2.2), False: dict(car=34, mini=2.0)}
+
+def grouper(mots, long):
+    r = LISIBLE[long]
+    groupes, cur = [], []
+    for i, w in enumerate(mots):
+        cur.append(w)
+        if i == len(mots) - 1:
+            groupes.append(cur); break
+        suivant, ecart = mots[i + 1], mots[i + 1]["t0"] - w["t1"]
+        texte = " ".join(x["txt"] for x in cur)
+        duree, p = w["t1"] - cur[0]["t0"], pause_ponct(w["txt"])
+        trop_long = len(texte) + 1 + len(suivant["txt"]) > r["car"]
+        if trop_long:
+            # plutôt que de couper au milieu d'une phrase, on revient à la dernière ponctuation du groupe
+            j = max((k for k in range(len(cur) - 1) if pause_ponct(cur[k]["txt"]) > 0 and cur[k]["t1"] - cur[0]["t0"] >= 0.8), default=None)
+            if j is not None:
+                groupes.append(cur[: j + 1]); cur = cur[j + 1:]
+            else:
+                groupes.append(cur); cur = []
+        elif ecart > 0.9 or (p >= 0.3 and duree >= r["mini"]) or (p > 0 and duree >= r["mini"] * 1.4):
+            groupes.append(cur); cur = []
+    # les bouts trop courts (« La peur. ») rejoignent leur voisin s'il reste de la place
+    fus = []
+    for g in groupes:
+        if fus:
+            d = g[-1]["t1"] - g[0]["t0"]; dp = fus[-1][-1]["t1"] - fus[-1][0]["t0"]
+            place = len(" ".join(x["txt"] for x in fus[-1] + g)) <= r["car"] * 1.15
+            if place and (d < r["mini"] * 0.7 or dp < r["mini"] * 0.7) and g[0]["t0"] - fus[-1][-1]["t1"] < 0.9:
+                fus[-1] = fus[-1] + g; continue
+        fus.append(g)
+    return [dict(t0=g[0]["t0"] - 0.05, t1=g[-1]["t1"], mots=[dict(t0=x["t0"], t1=x["t1"], txt=x["txt"]) for x in g]) for g in fus]
+
+def tenir(subs):
+    """Pas de clignotement : un groupe reste affiché jusqu'au suivant (si la pause est courte), sinon 0,5 s de plus."""
+    subs.sort(key=lambda g: g["t0"])
+    for g, n in zip(subs, subs[1:] + [None]):
+        fin = g["t1"] + 0.5
+        g["t1"] = round(n["t0"] if n and n["t0"] - g["t1"] < 1.2 else fin, 3)
+        g["t0"] = round(g["t0"], 3)
+    return subs
 
 
 # ---------------------------------------------------------------- voix (facultative)
@@ -176,16 +222,8 @@ def timeline(ep, ep_dir, fmt):
             if paroles and m["t0"] - paroles[-1][1] < 0.3: paroles[-1][1] = m["t1"]
             else: paroles.append([m["t0"], m["t1"]])
         # sous-titres par groupes de mots (pas pendant la carte du verset : le verset s'écrit dans la carte)
-        maxi = 8 if long else 3
         if not b.get("carte_verset"):
-            groupe = []
-            for i, m in enumerate(mots):
-                groupe.append(m)
-                fin = i == len(mots) - 1 or pause_ponct(m["txt"]) >= 0.3 or len(groupe) >= maxi \
-                    or (pause_ponct(m["txt"]) > 0 and len(groupe) >= 3) or (mots[i + 1]["t0"] - m["t1"] > 0.4)
-                if fin:
-                    subs.append(dict(t0=groupe[0]["t0"], t1=groupe[-1]["t1"] + 0.25, mots=[dict(t0=g["t0"], t1=g["t1"], txt=g["txt"]) for g in groupe]))
-                    groupe = []
+            subs += grouper(mots, long)
         # cartes déclenchées par une phrase du texte
         norme = lambda s: re.sub(r"[^\w ]", "", s.lower()).strip()
         for c in b.get("cartes", []):
@@ -226,7 +264,7 @@ def timeline(ep, ep_dir, fmt):
     while c < t:
         clins.append(round(c, 2)); c += 2.3 + rnd.random() * 2.7
     has_voice = any(v >= 0 for v in env_global)
-    return dict(dur=round(t, 3), segments=segs, soustitres=subs, cartes=cartes, intro=intro, voix=voix,
+    return dict(dur=round(t, 3), segments=segs, soustitres=tenir(subs), cartes=cartes, intro=intro, voix=voix,
                 piste=dict(syl=syl, paroles=paroles, clins=clins, env=env_global if has_voice else None))
 
 
@@ -323,7 +361,7 @@ def page_video(ep, ep_dir, fmt):
 <div id="voile" class="couche" style="background:rgba(10,6,4,.62);opacity:0"></div>
 <div id="cv" class="carte" style="left:60px;right:60px;top:520px;padding:44px 48px"><div class="ref" style="font-size:28px;margin-bottom:22px">{ep["reference_courte"]}</div><div class="v serif" style="font-size:62px;line-height:1.18"></div><div class="src" style="font-size:24px;margin-top:22px">{ep["traduction"]}</div></div>
 <div id="carte" class="carte" style="left:70px;right:70px;top:280px;padding:40px 44px;text-align:center"></div>
-<div id="st" class="fort" style="top:1090px;padding:0 70px;font-size:92px;line-height:1.05;color:#fff;text-transform:uppercase;-webkit-text-stroke:3px rgba(0,0,0,.85);paint-order:stroke fill;text-shadow:0 8px 30px rgba(0,0,0,.55)"></div>
+<div id="st" class="fort" style="top:1080px;padding:0 50px;font-size:72px;line-height:1.1;color:#fff;text-transform:uppercase;-webkit-text-stroke:3px rgba(0,0,0,.85);paint-order:stroke fill;text-shadow:0 8px 30px rgba(0,0,0,.55)"></div>
 <div id="com" style="left:120px;right:120px;top:215px;padding:30px 36px;font-size:46px;text-align:center"></div>
 <div id="cta" style="top:1290px;font-size:60px"></div>
 <div id="noir" class="couche"></div>"""
