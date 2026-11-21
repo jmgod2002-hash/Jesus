@@ -85,6 +85,25 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .lib-btns button:hover { border-color: var(--accent); }
 .empty { color: var(--muted); text-align: center; margin: 20px 0; }
 
+.hint { color: var(--muted); font-size: 12px; margin: 0 0 8px; }
+.actions.left { justify-content: space-between; align-items: center; margin-top: 0; }
+.check { display: inline-flex; align-items: center; gap: 5px; color: var(--text); font-size: 12px; cursor: pointer; }
+.check input { accent-color: var(--accent); margin: 0; }
+.row { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+.field.inline { display: flex; align-items: center; gap: 6px; margin: 0; flex: 1; }
+.field.inline input { margin: 0; }
+#dl-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 300px; overflow-y: auto; }
+#dl-list li {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 6px 8px; margin-bottom: 4px; cursor: pointer;
+}
+#dl-list li input { accent-color: var(--accent); }
+#dl-list img { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; background: var(--line); flex-shrink: 0; }
+#dl-list .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.actions .meta { margin: 0 auto 0 0; align-self: center; }
+body.dl-mode footer { display: none; }
+
 footer {
   display: flex; gap: 12px; justify-content: center;
   padding: 8px 14px 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px;

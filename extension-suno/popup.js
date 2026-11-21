@@ -48,6 +48,7 @@ document.querySelectorAll(".tabs button").forEach((b) =>
     document.querySelectorAll(".tabs button, .panel").forEach((x) => x.classList.remove("active"));
     b.classList.add("active");
     $("#tab-" + b.dataset.tab).classList.add("active");
+    document.body.classList.toggle("dl-mode", b.dataset.tab === "dl");
     if (b.dataset.tab === "library") renderLibrary();
     saveDraft();
   })
@@ -286,11 +287,85 @@ async function restoreDraft() {
   if (m) m.checked = true;
   updateStyleCount();
   updateLyricsCount();
-  if (d.tab && d.tab !== "style") document.querySelector(`.tabs button[data-tab=${d.tab}]`)?.click();
+  if (d.tab && d.tab !== "dl") document.querySelector(`.tabs button[data-tab=${d.tab}]`)?.click();
 }
 document.querySelectorAll("input[name=mode]").forEach((r) => r.addEventListener("change", saveDraft));
 
+/* ---------- TÉLÉCHARGER ---------- */
+let found = [];
+
+async function sunoTab() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  return tab?.url && /^https:\/\/([a-z0-9-]+\.)?suno\.com\//.test(tab.url) ? tab : null;
+}
+
+async function scan() {
+  const tab = await sunoTab();
+  if (!tab) return setStatus("Ouvre d'abord une page suno.com", "err");
+  const ask = () => chrome.tabs.sendMessage(tab.id, { type: "atelier-scan" });
+  let res;
+  try {
+    res = await ask();
+  } catch {
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
+    res = await ask();
+  }
+  found = res?.songs || [];
+  renderSongs();
+  setStatus(`${found.length} chanson(s) trouvée(s)`, found.length ? "ok" : "err");
+}
+
+function renderSongs() {
+  const ul = $("#dl-list");
+  ul.innerHTML = "";
+  $("#dl-empty").style.display = found.length ? "none" : "block";
+  for (const s of found) {
+    const li = document.createElement("li");
+    li.innerHTML = `<input type="checkbox"><img alt=""><span class="t"></span>`;
+    const cb = li.querySelector("input");
+    cb.checked = true;
+    cb.dataset.id = s.id;
+    const img = li.querySelector("img");
+    img.onerror = () => (img.style.visibility = "hidden");
+    if (s.image) img.src = s.image; else img.style.visibility = "hidden";
+    li.querySelector(".t").textContent = s.title || s.id;
+    li.addEventListener("click", (e) => {
+      if (e.target !== cb) cb.checked = !cb.checked;
+      updateDlCount();
+    });
+    ul.appendChild(li);
+  }
+  $("#dl-all").checked = found.length > 0;
+  updateDlCount();
+}
+
+function checkedSongs() {
+  const ids = new Set([...document.querySelectorAll("#dl-list input:checked")].map((c) => c.dataset.id));
+  return found.filter((s) => ids.has(s.id));
+}
+function updateDlCount() {
+  $("#dl-count").textContent = `${checkedSongs().length} sélectionnée(s)`;
+}
+
+$("#dl-scan").addEventListener("click", scan);
+$("#dl-all").addEventListener("change", (e) => {
+  document.querySelectorAll("#dl-list input").forEach((c) => (c.checked = e.target.checked));
+  updateDlCount();
+});
+$("#dl-go").addEventListener("click", async () => {
+  const songs = checkedSongs();
+  const audio = $("#dl-audio").checked, cover = $("#dl-cover").checked;
+  if (!songs.length) return setStatus("Aucune chanson cochée", "err");
+  if (!audio && !cover) return setStatus("Coche MP3 ou Pochette", "err");
+  setStatus(`Téléchargement de ${songs.length} chanson(s)…`);
+  const res = await chrome.runtime.sendMessage({
+    type: "atelier-download", songs, audio, cover, folder: $("#dl-folder").value
+  });
+  setStatus(res.fail ? `${res.ok} OK, ${res.fail} échec(s)` : `${res.ok} fichier(s) lancés`, res.fail ? "err" : "ok");
+});
+
 /* ---------- init ---------- */
+document.body.classList.add("dl-mode");
 buildChips();
 buildLyrics();
 restoreDraft();

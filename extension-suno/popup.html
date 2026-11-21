@@ -12,13 +12,34 @@
   </header>
 
   <nav class="tabs">
-    <button data-tab="style" class="active">Style</button>
+    <button data-tab="dl" class="active">Télécharger</button>
+    <button data-tab="style">Style</button>
     <button data-tab="lyrics">Paroles</button>
     <button data-tab="library">Bibliothèque</button>
   </nav>
 
+  <!-- TÉLÉCHARGER -->
+  <section id="tab-dl" class="panel active">
+    <p class="hint">Ouvre ta bibliothèque (suno.com/me), une playlist ou une page de chanson, fais défiler pour tout afficher, puis clique « Analyser ».</p>
+    <div class="actions left">
+      <button id="dl-scan">Analyser la page</button>
+      <label class="check"><input type="checkbox" id="dl-all"> Tout cocher</label>
+    </div>
+    <ul id="dl-list"></ul>
+    <p id="dl-empty" class="empty">Aucune chanson repérée.</p>
+    <div class="row">
+      <label class="check"><input type="checkbox" id="dl-audio" checked> MP3</label>
+      <label class="check"><input type="checkbox" id="dl-cover"> Pochette</label>
+      <label class="field inline">Dossier <input id="dl-folder" type="text" value="Suno"></label>
+    </div>
+    <div class="actions">
+      <span class="meta" id="dl-count">0 sélectionnée(s)</span>
+      <button id="dl-go">Télécharger</button>
+    </div>
+  </section>
+
   <!-- STYLE -->
-  <section id="tab-style" class="panel active">
+  <section id="tab-style" class="panel">
     <div id="chips"></div>
     <label class="field">Ajouts libres
       <input id="style-free" type="text" placeholder="ex. orgue Hammond, chœur gospel">

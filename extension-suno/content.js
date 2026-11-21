@@ -63,7 +63,63 @@
     el.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  /* ---------- repérage des chansons pour le téléchargement ---------- */
+  const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+  const audioById = new Map(); // id -> URL audio réellement jouée par la page
+
+  // Retient l'URL des fichiers audio que la page charge (quand on lance une lecture).
+  document.addEventListener(
+    "play",
+    (e) => {
+      const src = e.target?.currentSrc || e.target?.src || "";
+      const m = src.match(UUID);
+      if (m) audioById.set(m[0].toLowerCase(), src);
+    },
+    true
+  );
+
+  function scanSongs() {
+    const songs = new Map();
+    const add = (id, title, image) => {
+      id = id.toLowerCase();
+      const cur = songs.get(id) || { id, title: "", image: "" };
+      if (title && title.length > cur.title.length && title.length < 120) cur.title = title;
+      if (image && !cur.image) cur.image = image;
+      songs.set(id, cur);
+    };
+
+    for (const a of document.querySelectorAll('a[href*="/song/"]')) {
+      const m = a.getAttribute("href").match(/\/song\/([0-9a-f-]{36})/i);
+      if (!m) continue;
+      const img = a.querySelector("img");
+      const text = (a.getAttribute("title") || a.textContent || img?.alt || "").trim();
+      add(m[1], text, img?.src && /suno/.test(img.src) ? img.src : "");
+    }
+
+    // Page d'une chanson seule : suno.com/song/<id>
+    const here = location.pathname.match(/\/song\/([0-9a-f-]{36})/i);
+    if (here) {
+      const h1 = document.querySelector("h1");
+      const t = (h1?.textContent || document.title.split("|")[0] || "").trim();
+      add(here[1], t, "");
+    }
+
+    for (const el of document.querySelectorAll("audio[src], audio source[src]")) {
+      const m = el.src.match(UUID);
+      if (m) {
+        add(m[0], "", "");
+        audioById.set(m[0].toLowerCase(), el.src);
+      }
+    }
+
+    return [...songs.values()].map((s) => ({ ...s, audio: audioById.get(s.id) || "" }));
+  }
+
   chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
+    if (msg?.type === "atelier-scan") {
+      reply({ songs: scanSongs() });
+      return;
+    }
     if (msg?.type !== "atelier-insert") return;
     const target =
       (msg.target === "focused" && lastField && document.contains(lastField) && lastField) ||
