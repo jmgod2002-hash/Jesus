@@ -23,21 +23,42 @@
     return best || "Chanson Suno";
   }
 
-  function download(id, audioUrl, btn) {
-    const song = { id, title: titleFor(id), audio: audioUrl || "", image: "" };
-    if (btn) { btn.textContent = "…"; btn.disabled = true; }
-    chrome.runtime.sendMessage(
-      { type: "atelier-download", songs: [song], audio: true, cover: settings.withCover, folder: "Suno" },
-      (res) => {
-        const ok = res && !res.fail;
-        if (btn) {
-          btn.textContent = ok ? "✓" : "✕";
-          btn.title = ok ? "Téléchargé" : (res?.errors?.[0] || "Échec du téléchargement");
-          setTimeout(() => { btn.textContent = "⬇"; btn.disabled = false; }, 2500);
-        }
-      }
-    );
+  // Ajoute la chanson à la file d'enregistrement (gérée par le service worker).
+  function download(id) {
+    chrome.runtime.sendMessage({ type: "atelier-download", songs: [{ id, title: titleFor(id) }], folder: "Suno" });
   }
+
+  /* ---------- état de la file → affichage des boutons ---------- */
+  let queue = [];
+
+  function jobText(j) {
+    if (!j) return { icon: "⬇", tip: "Enregistrer cette chanson (M4A)" };
+    if (j.status === "enregistrement") {
+      const pct = Math.round((j.progress || 0) * 100);
+      return { icon: pct ? pct + "" : "●", tip: `Enregistrement en cours : ${pct} %` };
+    }
+    if (j.status === "attente") return { icon: "⏳", tip: "En attente dans la file" };
+    if (j.status === "enregistré") return { icon: "✓", tip: "Enregistré dans Téléchargements/Suno — cliquer pour refaire" };
+    return { icon: "✕", tip: "Échec : " + j.error + " — cliquer pour réessayer" };
+  }
+
+  function paintButtons() {
+    for (const b of document.querySelectorAll(".atelier-dl")) {
+      const { icon, tip } = jobText(queue.find((j) => j.id === b.dataset.id));
+      if (b.textContent !== icon) b.textContent = icon;
+      b.title = tip;
+      b.style.fontSize = icon.length > 1 && /\d/.test(icon) ? "9px" : "12px";
+    }
+    paintPopup();
+  }
+
+  chrome.storage.session.get("atelierQueue").then((r) => { queue = r.atelierQueue || []; paintButtons(); }).catch(() => {});
+  chrome.storage.onChanged.addListener((ch, area) => {
+    if (area === "session" && ch.atelierQueue) {
+      queue = ch.atelierQueue.newValue || [];
+      paintButtons();
+    }
+  });
 
   // Empêche le clic de remonter jusqu'à la ligne Suno (qui lancerait la lecture ou changerait de page).
   const block = (el) =>
@@ -66,14 +87,19 @@
       b.className = "atelier-dl";
       b.dataset.id = id;
       b.type = "button";
-      b.textContent = "⬇";
-      b.title = "Télécharger le MP3";
       b.style.cssText = BTN_STYLE;
       b.onmouseenter = () => (b.style.opacity = "1");
       b.onmouseleave = () => (b.style.opacity = ".85");
       block(b);
-      b.addEventListener("click", () => download(id, "", b));
+      b.addEventListener("click", () => {
+        const j = queue.find((x) => x.id === id);
+        if (j && ["attente", "enregistrement"].includes(j.status)) return; // déjà en cours
+        download(id);
+      });
       a.insertAdjacentElement("afterend", b);
+      const { icon, tip } = jobText(queue.find((j) => j.id === id));
+      b.textContent = icon;
+      b.title = tip;
     }
   }
 
@@ -131,29 +157,51 @@
     if (id === lastShownId && box.classList.contains("show")) return;
     lastShownId = id;
     root.querySelector("b").textContent = titleFor(id);
-    const go = root.querySelector(".go");
-    go.onclick = () => {
-      go.textContent = "…";
-      chrome.runtime.sendMessage(
-        { type: "atelier-download", songs: [{ id, title: titleFor(id), audio: src, image: "" }],
-          audio: true, cover: settings.withCover, folder: "Suno" },
-        (res) => {
-          go.textContent = res && !res.fail ? "✓ Lancé" : "✕ Échec";
-          setTimeout(() => (go.textContent = "⬇ Télécharger"), 2500);
-        }
-      );
+    root.querySelector(".go").onclick = () => {
+      const j = queue.find((x) => x.id === id);
+      if (!j || !["attente", "enregistrement"].includes(j.status)) download(id);
     };
+    paintPopup();
     box.classList.add("show");
     scheduleHide();
+  }
+
+  function paintPopup() {
+    if (!root || !lastShownId) return;
+    const j = queue.find((x) => x.id === lastShownId);
+    const go = root.querySelector(".go");
+    const map = {
+      attente: "⏳ En attente",
+      enregistrement: `● ${Math.round((j?.progress || 0) * 100)} %`,
+      "enregistré": "✓ Enregistré",
+      erreur: "✕ Réessayer"
+    };
+    go.textContent = j ? map[j.status] : "⬇ Télécharger";
+    go.title = j?.status === "erreur" ? j.error : "";
+  }
+
+  // L'audio de Suno est un flux "blob:" sans identifiant : on lit la chanson en cours
+  // dans le lien de la barre de lecture (en bas de l'écran).
+  function playingSongId() {
+    let el = document.querySelector('button[aria-label^="Playbar:"]');
+    for (let i = 0; i < 6 && el; i++) {
+      el = el.parentElement;
+      const a = el?.querySelector('a[href*="/song/"]');
+      const m = a?.getAttribute("href").match(UUID);
+      if (m) return m[0].toLowerCase();
+    }
+    return location.pathname.match(UUID)?.[0].toLowerCase() || null;
   }
 
   document.addEventListener(
     "play",
     (e) => {
-      if (e.target?.tagName !== "AUDIO") return;
-      const src = e.target.currentSrc || e.target.src || "";
-      const m = src.match(UUID) || location.pathname.match(UUID);
-      if (m) showPopup(m[0].toLowerCase(), src.match(UUID) ? src : "");
+      if (e.target?.tagName !== "AUDIO" || document.visibilityState === "hidden") return;
+      // Laisse le temps à Suno de mettre à jour la barre de lecture.
+      setTimeout(() => {
+        const id = playingSongId();
+        if (id) showPopup(id);
+      }, 700);
     },
     true
   );

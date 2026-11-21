@@ -105,6 +105,27 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .actions .meta { margin: 0 auto 0 0; align-self: center; }
 body.dl-mode footer { display: none; }
 
+#q-box { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px; margin-bottom: 10px; }
+.q-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 12px; }
+.q-btns { display: flex; gap: 4px; }
+.mini {
+  background: none; border: 1px solid var(--line); color: var(--muted);
+  border-radius: 4px; padding: 2px 6px; cursor: pointer; font: inherit; font-size: 10px;
+}
+.mini:hover { color: var(--text); border-color: var(--accent); }
+#q-list { list-style: none; margin: 6px 0 0; padding: 0; max-height: 170px; overflow-y: auto; }
+#q-list li {
+  display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 4px; font-size: 12px;
+  background: linear-gradient(90deg, rgba(232,163,61,.22) var(--p, 0%), transparent var(--p, 0%));
+}
+#q-list .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.q-i { width: 14px; text-align: center; }
+.q-s { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.q-enregistrement .q-i { color: var(--err); }
+.q-enregistre .q-i { color: var(--ok); }
+.q-erreur .q-i, .q-erreur .q-s { color: var(--err); }
+.empty.small { margin: 8px 0 2px; font-size: 11px; }
+
 footer {
   display: flex; gap: 12px; justify-content: center;
   padding: 8px 14px 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px;

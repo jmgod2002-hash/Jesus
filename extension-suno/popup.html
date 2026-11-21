@@ -20,7 +20,18 @@
 
   <!-- TÉLÉCHARGER -->
   <section id="tab-dl" class="panel active">
-    <p class="hint">Ouvre ta bibliothèque (suno.com/me), une playlist ou une page de chanson, fais défiler pour tout afficher, puis clique « Analyser ».</p>
+    <p class="hint">Suno chiffre ses fichiers : chaque chanson est <b>enregistrée en temps réel</b> dans un onglet Suno ouvert en arrière-plan, son coupé (3 min de chanson = 3 min d'attente). Ne ferme pas cet onglet, il se ferme seul.</p>
+    <div id="q-box">
+      <div class="q-head"><b>File d'enregistrement</b>
+        <span class="q-btns">
+          <button id="q-retry" class="mini">Réessayer les échecs</button>
+          <button id="q-clear" class="mini">Nettoyer</button>
+          <button id="q-cancel" class="mini">Tout arrêter</button>
+        </span>
+      </div>
+      <ul id="q-list"></ul>
+      <p id="q-empty" class="empty small">File vide. Clique ⬇ à côté d'un titre sur Suno, ou analyse la page ci-dessous.</p>
+    </div>
     <div class="actions left">
       <button id="dl-scan">Analyser la page</button>
       <label class="check"><input type="checkbox" id="dl-all"> Tout cocher</label>
@@ -28,17 +39,17 @@
     <ul id="dl-list"></ul>
     <p id="dl-empty" class="empty">Aucune chanson repérée.</p>
     <div class="row">
-      <label class="check"><input type="checkbox" id="dl-audio" checked> MP3</label>
-      <label class="check"><input type="checkbox" id="dl-cover"> Pochette</label>
+      <label class="check"><input type="checkbox" id="dl-cover"> + Pochette</label>
       <label class="field inline">Dossier <input id="dl-folder" type="text" value="Suno"></label>
     </div>
     <div class="row settings">
       <label class="check"><input type="checkbox" id="set-inline" checked> Bouton ⬇ à côté des titres</label>
       <label class="check"><input type="checkbox" id="set-popup" checked> Pop-up à la lecture</label>
+      <label class="check" title="Sans cette option, Chrome peut exiger que tu cliques toi-même sur Play dans la fenêtre d'enregistrement."><input type="checkbox" id="set-auto"> Démarrage automatique (vrai clic sur Play)</label>
     </div>
     <div class="actions">
       <span class="meta" id="dl-count">0 sélectionnée(s)</span>
-      <button id="dl-go">Télécharger</button>
+      <button id="dl-go">Ajouter à la file</button>
     </div>
   </section>
 

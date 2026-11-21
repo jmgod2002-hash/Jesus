@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Atelier Suno",
-  "version": "1.2.0",
-  "description": "Télécharge tes chansons Suno (MP3 + pochettes), construit styles et paroles, garde tes prompts.",
+  "version": "2.0.0",
+  "description": "Enregistre tes chansons Suno (M4A + pochettes), construit styles et paroles, garde tes prompts.",
   "permissions": [
     "storage",
     "activeTab",
@@ -37,12 +37,16 @@
       ],
       "js": [
         "content.js",
-        "page-buttons.js"
+        "page-buttons.js",
+        "record.js"
       ],
       "run_at": "document_idle"
     }
   ],
   "background": {
     "service_worker": "bg.js"
-  }
+  },
+  "optional_permissions": [
+    "debugger"
+  ]
 }

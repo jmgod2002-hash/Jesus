@@ -354,14 +354,55 @@ $("#dl-all").addEventListener("change", (e) => {
 });
 $("#dl-go").addEventListener("click", async () => {
   const songs = checkedSongs();
-  const audio = $("#dl-audio").checked, cover = $("#dl-cover").checked;
   if (!songs.length) return setStatus("Aucune chanson cochée", "err");
-  if (!audio && !cover) return setStatus("Coche MP3 ou Pochette", "err");
-  setStatus(`Téléchargement de ${songs.length} chanson(s)…`);
   const res = await chrome.runtime.sendMessage({
-    type: "atelier-download", songs, audio, cover, folder: $("#dl-folder").value
+    type: "atelier-download",
+    songs: songs.map((s) => ({ id: s.id, title: s.title })),
+    cover: $("#dl-cover").checked,
+    folder: $("#dl-folder").value
   });
-  setStatus(res.fail ? `${res.ok} OK, ${res.fail} échec(s)` : `${res.ok} fichier(s) lancés`, res.fail ? "err" : "ok");
+  setStatus(res?.queued ? `${res.queued} ajoutée(s) à la file` : "Déjà dans la file", res?.queued ? "ok" : "");
+});
+
+/* ---------- file d'enregistrement ---------- */
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+function renderQueue(q) {
+  const ul = $("#q-list");
+  ul.innerHTML = "";
+  $("#q-empty").style.display = q.length ? "none" : "block";
+  const ICON = { attente: "⏳", enregistrement: "●", "enregistré": "✓", erreur: "✕" };
+  for (const j of q) {
+    const li = document.createElement("li");
+    li.className = "q-" + j.status.replace("é", "e");
+    li.innerHTML = `<span class="q-i"></span><span class="t"></span><span class="q-s"></span>`;
+    li.querySelector(".q-i").textContent = ICON[j.status] || "?";
+    li.querySelector(".t").textContent = j.title || j.id;
+    let s = "";
+    if (j.status === "attente") s = "En attente";
+    if (j.status === "enregistrement") {
+      s = j.needClick
+        ? "Clique ▶ dans la fenêtre Suno"
+        : j.duration ? `${Math.round(j.progress * 100)} % · reste ${fmt(j.duration * (1 - j.progress))}` : "Démarrage…";
+    }
+    if (j.status === "enregistré") s = "Enregistré";
+    if (j.status === "erreur") { s = "Échec"; li.title = j.error; }
+    li.querySelector(".q-s").textContent = s;
+    if (j.status === "enregistrement") {
+      li.style.setProperty("--p", `${Math.round((j.progress || 0) * 100)}%`);
+    }
+    ul.appendChild(li);
+  }
+}
+
+chrome.storage.session.get("atelierQueue").then((r) => renderQueue(r.atelierQueue || []));
+chrome.storage.onChanged.addListener((ch, area) => {
+  if (area === "session" && ch.atelierQueue) renderQueue(ch.atelierQueue.newValue || []);
+});
+$("#q-retry").addEventListener("click", () => chrome.runtime.sendMessage({ type: "atelier-queue-retry" }));
+$("#q-clear").addEventListener("click", () => chrome.runtime.sendMessage({ type: "atelier-queue-clear" }));
+$("#q-cancel").addEventListener("click", () => {
+  if (confirm("Arrêter l'enregistrement en cours et vider la file ?")) chrome.runtime.sendMessage({ type: "atelier-queue-cancel" });
 });
 
 /* ---------- réglages des boutons sur la page ---------- */
@@ -383,6 +424,19 @@ function savePageSettings() {
 }
 ["#set-inline", "#set-popup", "#dl-cover"].forEach((s) => $(s).addEventListener("change", savePageSettings));
 loadPageSettings();
+
+// Démarrage automatique : permission « debugger » demandée seulement si l'utilisateur coche.
+// Chrome affiche alors un bandeau « a commencé le débogage » pendant une fraction de seconde à chaque chanson.
+const DBG = { permissions: ["debugger"] };
+chrome.permissions.contains(DBG).then((ok) => ($("#set-auto").checked = ok));
+$("#set-auto").addEventListener("change", async (e) => {
+  if (e.target.checked) {
+    e.target.checked = await chrome.permissions.request(DBG).catch(() => false);
+    setStatus(e.target.checked ? "Démarrage automatique activé" : "Permission refusée", e.target.checked ? "ok" : "err");
+  } else {
+    await chrome.permissions.remove(DBG).catch(() => {});
+  }
+});
 
 /* ---------- init ---------- */
 document.body.classList.add("dl-mode");
