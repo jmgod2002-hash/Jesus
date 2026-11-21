@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Atelier Suno",
+  "version": "1.0.0",
+  "description": "Construit les styles et les structures de paroles pour Suno, garde tes prompts, et les insère directement dans la page.",
+  "permissions": ["storage", "activeTab", "scripting", "clipboardWrite"],
+  "host_permissions": ["https://suno.com/*", "https://*.suno.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Atelier Suno",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://suno.com/*", "https://*.suno.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

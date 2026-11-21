@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Atelier Suno</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>Atelier Suno</h1>
+    <span id="status" class="status"></span>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="style" class="active">Style</button>
+    <button data-tab="lyrics">Paroles</button>
+    <button data-tab="library">Bibliothèque</button>
+  </nav>
+
+  <!-- STYLE -->
+  <section id="tab-style" class="panel active">
+    <div id="chips"></div>
+    <label class="field">Ajouts libres
+      <input id="style-free" type="text" placeholder="ex. orgue Hammond, chœur gospel">
+    </label>
+    <label class="field">Exclure (négatif)
+      <input id="style-exclude" type="text" placeholder="ex. no autotune, no rap">
+    </label>
+    <label class="field">Résultat
+      <textarea id="style-out" rows="4"></textarea>
+    </label>
+    <div class="meta"><span id="style-count">0</span> caractères</div>
+    <div class="actions">
+      <button id="style-clear" class="ghost">Vider</button>
+      <button id="style-save" class="ghost">Enregistrer</button>
+      <button id="style-copy" class="ghost">Copier</button>
+      <button id="style-insert">Insérer dans Suno</button>
+    </div>
+  </section>
+
+  <!-- PAROLES -->
+  <section id="tab-lyrics" class="panel">
+    <label class="field">Modèle de structure
+      <select id="tpl"></select>
+    </label>
+    <div class="tagbar" id="tags"></div>
+    <label class="field">Paroles
+      <textarea id="lyrics-out" rows="12" placeholder="Choisis un modèle ou clique sur les balises pour construire la chanson."></textarea>
+    </label>
+    <div class="meta"><span id="lyrics-count">0</span> caractères · <span id="lyrics-lines">0</span> lignes</div>
+    <div class="actions">
+      <button id="lyrics-clear" class="ghost">Vider</button>
+      <button id="lyrics-save" class="ghost">Enregistrer</button>
+      <button id="lyrics-copy" class="ghost">Copier</button>
+      <button id="lyrics-insert">Insérer dans Suno</button>
+    </div>
+  </section>
+
+  <!-- BIBLIOTHÈQUE -->
+  <section id="tab-library" class="panel">
+    <input id="lib-search" type="search" placeholder="Rechercher…">
+    <ul id="lib-list"></ul>
+    <p id="lib-empty" class="empty">Rien d'enregistré pour l'instant.</p>
+    <div class="actions">
+      <button id="lib-export" class="ghost">Exporter</button>
+      <label class="ghost btn-file">Importer<input id="lib-import" type="file" accept="application/json" hidden></label>
+    </div>
+  </section>
+
+  <footer>
+    <label><input type="radio" name="mode" value="replace" checked> Remplacer</label>
+    <label><input type="radio" name="mode" value="append"> Ajouter à la fin</label>
+    <label><input type="radio" name="mode" value="insert"> Au curseur</label>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
