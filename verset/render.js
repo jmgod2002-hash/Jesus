@@ -69,7 +69,7 @@ function graphe(C, dir, bed, nAvant) {
   } else mix.push("[mus]");
   if (C.intro) { fc.push(`[2:a]aformat=sample_rates=48000:channel_layouts=stereo,adelay=${Math.round(C.intro.t0 * 1000)}:all=1[ia]`); mix.push("[ia]"); }
   fc.push(`${mix.join("")}amix=inputs=${mix.length}:normalize=0,atrim=0:${C.dur},loudnorm=I=${voix.length ? -14 : -18}:TP=-1.5:LRA=11[a]`);
-  return { ins, fc };
+  return { ins, fc, voix, musique };
 }
 
 async function video(browser, fmt) {
@@ -114,7 +114,7 @@ async function video(browser, fmt) {
     }
   }));
   await Promise.all(pages.map(p => p.close()));
-  const { ins, fc } = graphe(C, dir, bed, nAvant);
+  const { ins, fc, voix, musique } = graphe(C, dir, bed, nAvant);
   fs.mkdirSync(OUT, { recursive: true });
   const sortie = path.join(OUT, NOMS[fmt]);
   ff([...ins, "-filter_complex", fc.join(";"), "-map", "[v]", "-map", "[a]", "-t", String(C.dur), "-r", String(FPS),
