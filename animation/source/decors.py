@@ -318,11 +318,13 @@ def sommet():
                                                           (868, 66, 118, 13, "#FCD8C2", "#A97C9E"), (968, 90, 150, -19, "#F6CDBA", "#8A6890"))):
         d += f'<linearGradient id="c3_n{k}" gradientUnits="userSpaceOnUse" x1="0" y1="{y0-rmax}" x2="0" y2="{y0+rmax*1.3:.0f}"><stop offset="0" stop-color="{haut}"/><stop offset=".55" stop-color="{bas}"/><stop offset="1" stop-color="{bas}"/></linearGradient>'
         puffs, x = [], -420
-        while x < 2420:
+        while x < 1980:
             r = rnd.uniform(rmin, rmax)
             puffs.append(f'<circle cx="{x:.0f}" cy="{y0+r*rnd.uniform(.1, .45):.0f}" r="{r:.0f}"/>')
             x += r * rnd.uniform(1.0, 1.45)
-        b.append(f'<g class="nuage" data-v="{vit}"><g fill="url(#c3_n{k})" filter="url(#d_b3)">{"".join(puffs)}<rect x="-420" y="{y0+rmax*.35:.0f}" width="2840" height="{1080-y0+40}"/></g></g>')
+        bande = f'{"".join(puffs)}<rect x="-420" y="{y0+rmax*.35:.0f}" width="2400" height="{1080-y0+40}"/>'
+        # deux copies décalées d'une période (2400) : la bande défile en boucle sans trou
+        b.append(f'<g class="nuage" data-v="{vit}"><g fill="url(#c3_n{k})" filter="url(#d_b3)">{bande}<g transform="translate(-2400 0)">{bande}</g></g></g>')
     # rocher au premier plan
     b.append(f'<path d="{ROCHER}" fill="url(#c3_roc)"/>')
     b.append('<path d="M0 820 L120 800 L260 838 L420 878 L620 884 L860 896 L980 930 L1080 990 L1180 1080" fill="none" stroke="#FFB070" stroke-width="7" opacity=".75" filter="url(#d_b3)"/>')
@@ -464,6 +466,7 @@ svg{{display:block}}
 <!-- Fichier généré par animation/source/decors.py : ne pas modifier à la main. -->
 <div id="stage">{svg}</div>
 <script>window.CONFIG={json.dumps(config, ensure_ascii=False)};</script>
+<script src="moteur.js"></script>
 <script src="anim.js"></script>
 </body></html>'''
     out = os.path.join(ROOT, "animation/index.html")
