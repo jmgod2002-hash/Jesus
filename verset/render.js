@@ -83,11 +83,11 @@ async function video(browser, fmt) {
       `[2:v]fps=${FPS},scale=${C.w}:${C.h},setsar=1,format=yuv420p,setpts=PTS-STARTPTS[vi]`, `[va][vi][vb]concat=n=3:v=1:a=0[v]`);
   } else fc.push(`[0:v]format=yuv420p[v]`);
   const muet = C.intro ? `,volume='if(between(t,${C.intro.t0},${C.intro.t1}),0,1)':eval=frame` : "";
-  fc.push(`[1:a]atrim=0:${C.dur},asetpts=PTS-STARTPTS,aformat=sample_rates=48000:channel_layouts=stereo,volume=${voix.length ? (musique ? 0.22 : 0.3) : 1}${muet}[mus]`);
+  fc.push(`[1:a]atrim=0:${C.dur},asetpts=PTS-STARTPTS,aformat=sample_rates=48000:channel_layouts=stereo,${voix.length ? 'loudnorm=I=-32:TP=-8:LRA=11,' : ''}aformat=sample_rates=48000:channel_layouts=stereo${muet}[mus]`);
   const mix = [];
   if (voix.length) {
     voix.forEach((v, i) => fc.push(`[${v.idx}:a]aformat=sample_rates=48000:channel_layouts=mono,adelay=${Math.round(v.debut * 1000)}:all=1[v${i}]`));
-    fc.push(`${voix.map((_, i) => `[v${i}]`).join("")}amix=inputs=${voix.length}:normalize=0,${PODCAST},aformat=channel_layouts=stereo,asplit=2[vox][voxsc]`);
+    fc.push(`${voix.map((_, i) => `[v${i}]`).join("")}amix=inputs=${voix.length}:normalize=0,${PODCAST},loudnorm=I=-16:TP=-1.5:LRA=7,aformat=sample_rates=48000:channel_layouts=stereo,asplit=2[vox][voxsc]`);
     fc.push(`[mus][voxsc]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=450[musd]`);
     mix.push("[vox]", "[musd]");
   } else mix.push("[mus]");

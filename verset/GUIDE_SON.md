@@ -35,7 +35,8 @@ Une voix de synthèse sort propre mais « à plat ». `render.js` lui applique a
 | Dé-esseur | intensité 0,4 | Adoucit les « s » et les « ch » |
 | Compresseur | 3:1, attaque 8 ms, relâche 120 ms | Voix régulière, intime |
 | Limiteur | −1 dB | Aucun pic qui sature |
-| Musique | −13 dB sous la voix + baisse automatique quand elle parle | La musique respire entre les phrases |
+| Voix | ramenée à −16 LUFS | Même niveau d'un bloc à l'autre |
+| Musique | −32 LUFS (16 dB sous la voix) + baisse automatique quand elle parle | La musique respire entre les phrases |
 | Volume final | −14 LUFS, crête −1,5 dB | Norme YouTube et TikTok |
 
 Tu n'as rien à faire : dépose les voix, relance le rendu.

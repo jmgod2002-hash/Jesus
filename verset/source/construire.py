@@ -88,6 +88,46 @@ def lire_voix(chemin):
     debut, fin = (parle[0] / 100, parle[-1] / 100) if len(parle) else (0, n / 100)
     return len(x) / 8000, env, debut, fin
 
+def silences(env, d0, d1, seuil=0.12, mini=0.15):
+    """Milieux des silences (en s) d'au moins `mini` s entre le début et la fin de la parole."""
+    bas = env < seuil
+    out, i, n = [], int(d0 * 100), int(d1 * 100)
+    while i < n:
+        if bas[i]:
+            j = i
+            while j < n and bas[j]: j += 1
+            if (j - i) / 100 >= mini: out.append((i + j) / 200)
+            i = j
+        else:
+            i += 1
+    return out
+
+def caler(mots, env, d0, d1):
+    """Place les mots estimés sur la vraie voix : les grandes pauses du texte sont accrochées aux silences
+    réellement entendus (alignement ordonné), interpolation linéaire entre ces points d'ancrage."""
+    e0, e1 = mots[0]["t0"], mots[-1]["t1"]
+    coupures = [(mots[i]["t1"] + mots[i + 1]["t0"]) / 2 for i in range(len(mots) - 1) if mots[i + 1]["t0"] - mots[i]["t1"] >= 0.25]
+    reels = silences(env, d0, d1)
+    pe = [(c - e0) / (e1 - e0) for c in coupures]
+    pr = [(c - d0) / (d1 - d0) for c in reels]
+    # alignement monotone qui maximise le nombre de paires proches (programmation dynamique)
+    n, m, tol = len(pe), len(pr), 0.07
+    best = np.zeros((n + 1, m + 1), dtype=int)
+    for i in range(n - 1, -1, -1):
+        for j in range(m - 1, -1, -1):
+            best[i, j] = max(best[i + 1, j], best[i, j + 1], (1 + best[i + 1, j + 1]) if abs(pe[i] - pr[j]) < tol else -1)
+    ancres, i, j = [(e0, d0)], 0, 0
+    while i < n and j < m:
+        if abs(pe[i] - pr[j]) < tol and best[i, j] == 1 + best[i + 1, j + 1]:
+            ancres.append((coupures[i], reels[j])); i += 1; j += 1
+        elif best[i + 1, j] >= best[i, j + 1]: i += 1
+        else: j += 1
+    ancres.append((e1, d1))
+    xe, xr = np.array([a for a, _ in ancres]), np.array([b for _, b in ancres])
+    for w in mots:
+        w["t0"], w["t1"] = float(np.interp(w["t0"], xe, xr)), float(np.interp(w["t1"], xe, xr))
+    return len(ancres) - 2, len(coupures)
+
 def chercher_voix(ep_dir, bid):
     for ext in (".mp3", ".wav", ".m4a"):
         p = os.path.join(ep_dir, "voix", bid + ext)
@@ -111,9 +151,8 @@ def timeline(ep, ep_dir, fmt):
         chemin = chercher_voix(ep_dir, b["id"])
         if chemin:
             duree, env, d0, d1 = lire_voix(chemin)
-            k = (d1 - d0) / max(est - 0.3, 0.5)
-            for m in mots:
-                m["t0"], m["t1"] = d0 + m["t0"] * k, d0 + m["t1"] * k
+            calees, pauses = caler(mots, env, d0, d1)
+            print(f"   {b['id']:16s} voix {duree:5.1f} s · {calees}/{pauses} pauses du texte calées sur la voix")
             parlee = duree
             voix.append(dict(id=b["id"], fichier=os.path.relpath(chemin, ep_dir), debut=round(t, 3)))
         else:

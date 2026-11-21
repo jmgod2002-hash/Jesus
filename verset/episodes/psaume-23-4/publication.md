@@ -42,19 +42,19 @@ Dans cette vidéo :
 → une prière du soir pour dormir en paix
 
 0:00 Psaume 23:4 : le verset à lire quand tu as peur
-0:29 Introduction
-0:44 Le verset : Psaume 23:4
-1:03 Le contexte
-1:53 Ce que ça veut dire
-3:02 Pour toi, aujourd'hui
-4:01 Prions ensemble
+0:22 Introduction
+0:32 Le verset : Psaume 23:4
+0:43 Le contexte
+1:14 Ce que ça veut dire
+1:59 Pour toi, aujourd'hui
+2:39 Prions ensemble
 
 Un verset par jour, expliqué simplement. Abonne-toi pour ne pas manquer le prochain.
 Et écris en commentaire : « Tu es avec moi ».
 
 #psaume23 #prièredusoir #paroledeDieu
 ```
-Les minutages sont ceux de la maquette. Une fois les voix posées, relance `construire.py` et recopie `pages/chapitres.txt`.
+Minutages calés sur les voix ElevenLabs (vidéo de 3 min 23). Si tu changes une voix, relance `construire.py` et recopie `pages/chapitres.txt`.
 
 **Tags** (champ « Tags » de YouTube Studio : 403 caractères sur 500 autorisés)
 ```
