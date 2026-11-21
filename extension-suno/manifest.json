@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Atelier Suno",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Télécharge tes chansons Suno (MP3 + pochettes), construit styles et paroles, garde tes prompts.",
   "permissions": [
     "storage",
@@ -36,7 +36,8 @@
         "https://*.suno.com/*"
       ],
       "js": [
-        "content.js"
+        "content.js",
+        "page-buttons.js"
       ],
       "run_at": "document_idle"
     }

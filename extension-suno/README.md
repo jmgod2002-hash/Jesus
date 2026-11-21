@@ -20,7 +20,12 @@ Aide à écrire les prompts Suno, sans quitter la page.
 - Sur suno.com, **clique d'abord dans le champ voulu** (style ou paroles), puis ouvre l'extension et clique « Insérer dans Suno ».
 - Sans clic préalable, l'extension cherche le champ par son texte d'aide (« lyrics », « style »…). Ça marche tant que Suno ne change pas ses libellés.
 
-## Utiliser le téléchargement
+## Télécharger directement depuis la page
+- Un **bouton ⬇** apparaît à côté de chaque titre de chanson sur suno.com, y compris pour celles qui se chargent en faisant défiler la page. Un clic lance le téléchargement du MP3.
+- Quand une chanson **se lance**, une **pop-up** apparaît en bas à droite avec « ⬇ Télécharger ». Elle disparaît seule au bout de 8 secondes.
+- Les deux se désactivent dans l'onglet « Télécharger » de l'extension (cases en bas). La case « Pochette » s'applique aussi à ces boutons.
+
+## Télécharger plusieurs chansons d'un coup
 1. Va sur suno.com, ouvre ta bibliothèque ou une playlist.
 2. **Fais défiler jusqu'en bas** : Suno charge les chansons au fur et à mesure, l'extension ne voit que celles déjà affichées.
 3. Ouvre l'extension → « Analyser la page » → coche → « Télécharger ».

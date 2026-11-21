@@ -364,6 +364,26 @@ $("#dl-go").addEventListener("click", async () => {
   setStatus(res.fail ? `${res.ok} OK, ${res.fail} échec(s)` : `${res.ok} fichier(s) lancés`, res.fail ? "err" : "ok");
 });
 
+/* ---------- réglages des boutons sur la page ---------- */
+const PAGE_KEY = "atelierPageSettings";
+async function loadPageSettings() {
+  const s = (await chrome.storage.local.get(PAGE_KEY))[PAGE_KEY] || {};
+  $("#set-inline").checked = s.inlineButtons !== false;
+  $("#set-popup").checked = s.playPopup !== false;
+  $("#dl-cover").checked = !!s.withCover;
+}
+function savePageSettings() {
+  chrome.storage.local.set({
+    [PAGE_KEY]: {
+      inlineButtons: $("#set-inline").checked,
+      playPopup: $("#set-popup").checked,
+      withCover: $("#dl-cover").checked
+    }
+  });
+}
+["#set-inline", "#set-popup", "#dl-cover"].forEach((s) => $(s).addEventListener("change", savePageSettings));
+loadPageSettings();
+
 /* ---------- init ---------- */
 document.body.classList.add("dl-mode");
 buildChips();
