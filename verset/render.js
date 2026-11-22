@@ -5,6 +5,8 @@
 //   node verset/render.js <épisode> --format long --stills 3,40,120      → images de contrôle
 //   node verset/render.js <épisode> --images                             → miniature et couverture seulement
 //   node verset/render.js <épisode> --son [--format ...]                 → le son final seul, pour l'écouter (renders/ecoute_*.mp3)
+//   node verset/render.js <épisode> --pistes                            → kit de montage : voix.m4a, musique.m4a, intro.m4a dans montage/<format>/
+//   node verset/render.js <épisode> --fond                              → kit de montage : fond.mp4 (décor + personnage, sans aucun texte)
 //   node verset/render.js <épisode> --son --remux                       → refait le son et le remplace dans les vidéos déjà rendues
 // Son : voix ElevenLabs (voix/*.mp3) traitées « micro podcast » + musique (musique.mp3 si présent, sinon nappe provisoire)
 // baissée automatiquement sous la voix, puis normalisation -14 LUFS (YouTube, TikTok).
@@ -25,11 +27,11 @@ const ff = (a) => execFileSync("ffmpeg", ["-v", "error", "-y", ...a], { stdio: "
 const PODCAST = "highpass=f=75,equalizer=f=120:t=q:w=0.9:g=2,equalizer=f=350:t=q:w=1.2:g=-2.5,equalizer=f=3500:t=q:w=1:g=2.5," +
   "deesser=i=0.4,acompressor=threshold=0.1:ratio=3:attack=8:release=120:makeup=2:knee=3,alimiter=limit=0.89";
 
-async function ouvrir(browser, fichier, w, h) {
+async function ouvrir(browser, fichier, w, h, q = "") {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   page.on("pageerror", (e) => console.log("[erreur page]", e.message));
   page.on("console", (m) => { if (m.type() === "error") console.log("[console]", m.text()); });
-  await page.goto("file://" + fichier);
+  await page.goto("file://" + fichier + q);
   await page.evaluate(() => window.ready);
   return page;
 }
@@ -89,7 +91,9 @@ async function video(browser, fmt) {
   const temps = [];
   for (let n = 0; n < Math.round(C.dur * FPS); n++) { const t = (n + 0.5) / FPS; if (!(C.intro && t >= C.intro.t0 && t < C.intro.t1)) temps.push(t); }
   const nAvant = C.intro ? temps.filter(t => t < C.intro.t0).length : 0;
-  const SON = args.includes("--son"), bed = path.join(TMP, `${SON ? "ecoute_" : ""}fond_${fmt}.wav`);
+  const SON = args.includes("--son"), PISTES = args.includes("--pistes"), FOND = args.includes("--fond");
+  const bed = path.join(TMP, `${SON ? "ecoute_" : PISTES ? "pistes_" : ""}fond_${fmt}.wav`);
+  const KIT = path.join(EP, "montage", fmt);
   fs.writeFileSync(bed, Buffer.from(await first.evaluate(() => window.renderAudio()), "base64"));
   if (SON) {
     const g = graphe(C, null, bed, nAvant), wav = path.join(TMP, `ecoute_${fmt}.wav`), mp3 = wav.replace(".wav", ".mp3");
@@ -104,8 +108,19 @@ async function video(browser, fmt) {
     }
     console.log("son →", mp3); await first.close(); return;
   }
-  const dir = path.join(TMP, "frames_" + fmt); fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
-  const pages = [first, ...(await Promise.all(Array.from({ length: WORKERS - 1 }, () => ouvrir(browser, fichier, C.w, C.h))))];
+  if (PISTES) {
+    // mêmes réglages que le mixage final, mais chaque piste dans son fichier (la musique est déjà baissée sous la voix)
+    const g = graphe(C, null, bed, nAvant), fc = g.fc.slice(0, -1), map = [];
+    fs.mkdirSync(KIT, { recursive: true });
+    const sortie = (lab, nom, ch) => { fc.push(`[${lab}]apad,atrim=0:${C.dur},aformat=channel_layouts=${ch}[o_${nom}]`); map.push("-map", `[o_${nom}]`, "-c:a", "aac", "-b:a", "256k", path.join(KIT, nom + ".m4a")); };
+    if (g.voix.length) { sortie("vox", "voix", "mono"); sortie("musd", "musique", "stereo"); } else sortie("mus", "musique", "stereo");
+    if (C.intro) sortie("ia", "intro", "stereo");
+    ff([...g.ins, "-filter_complex", fc.join(";"), ...map]);
+    console.log("pistes →", KIT); await first.close(); return;
+  }
+  const dir = path.join(TMP, (FOND ? "frames_fond_" : "frames_") + fmt); fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
+  if (FOND) await first.goto("file://" + fichier + "?fond=1").then(() => first.evaluate(() => window.ready));
+  const pages = [first, ...(await Promise.all(Array.from({ length: WORKERS - 1 }, () => ouvrir(browser, fichier, C.w, C.h, FOND ? "?fond=1" : ""))))];
   const t0 = Date.now(); let done = 0;
   await Promise.all(pages.map(async (page, w) => {
     for (let n = w; n < temps.length; n += WORKERS) {
@@ -114,6 +129,20 @@ async function video(browser, fmt) {
     }
   }));
   await Promise.all(pages.map(p => p.close()));
+  if (FOND) {
+    // vidéo seule, sans son ni texte ; l'intro logo est déjà insérée à sa place
+    fs.mkdirSync(KIT, { recursive: true });
+    const ins = ["-framerate", String(FPS), "-i", path.join(dir, "f%05d.jpg")], fc = [];
+    if (C.intro) {
+      ins.push("-i", INTRO);
+      fc.push(`[0:v]split=2[va0][vb0]`, `[va0]trim=end_frame=${nAvant},setpts=PTS-STARTPTS,format=yuv420p[va]`, `[vb0]trim=start_frame=${nAvant},setpts=PTS-STARTPTS,format=yuv420p[vb]`,
+        `[1:v]fps=${FPS},scale=${C.w}:${C.h},setsar=1,format=yuv420p,setpts=PTS-STARTPTS[vi]`, `[va][vi][vb]concat=n=3:v=1:a=0[v]`);
+    } else fc.push(`[0:v]format=yuv420p[v]`);
+    const sortie = path.join(KIT, "fond.mp4");
+    ff([...ins, "-filter_complex", fc.join(";"), "-map", "[v]", "-an", "-t", String(C.dur), "-r", String(FPS), "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart", sortie]);
+    fs.rmSync(dir, { recursive: true, force: true });
+    console.log(`OK fond ${fmt} → ${sortie} (${((Date.now() - t0) / 1000).toFixed(0)} s)`); return;
+  }
   const { ins, fc, voix, musique } = graphe(C, dir, bed, nAvant);
   fs.mkdirSync(OUT, { recursive: true });
   const sortie = path.join(OUT, NOMS[fmt]);
@@ -129,6 +158,6 @@ async function video(browser, fmt) {
   const browser = await chromium.launch();
   if (args.includes("--images")) { await images(browser); await browser.close(); return; }
   for (const fmt of FORMATS) await video(browser, fmt);
-  if (!opt("--stills") && !opt("--format") && !args.includes("--son")) await images(browser);
+  if (!opt("--stills") && !opt("--format") && !["--son", "--pistes", "--fond"].some(a => args.includes(a))) await images(browser);
   await browser.close();
 })();

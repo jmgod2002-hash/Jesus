@@ -1,0 +1,3178 @@
+{
+ "format": "long",
+ "largeur": 1920,
+ "hauteur": 1080,
+ "fps": 30,
+ "duree": 225.069,
+ "unite": "secondes depuis le début de la vidéo finale",
+ "pistes": {
+  "video_sans_texte": "fond.mp4",
+  "voix": "voix.m4a",
+  "musique": "musique.m4a (déjà baissée sous la voix)",
+  "intro_son": "intro.m4a",
+  "sous_titres": "sous_titres.srt",
+  "video_complete": "../../rendu/psaume-23-4_youtube_long.mp4"
+ },
+ "intro": {
+  "debut": 18.086,
+  "fin": 24.086,
+  "fichier": "youtube/intro_1920x1080.mp4",
+  "note": "déjà incluse dans fond.mp4"
+ },
+ "blocs": [
+  {
+   "id": "01_accroche",
+   "debut": 0.0,
+   "fin": 18.086,
+   "decor": "chambre",
+   "plan": "serre",
+   "chapitre": null
+  },
+  {
+   "id": "02_bienvenue",
+   "debut": 24.086,
+   "fin": 35.67,
+   "decor": "feu de camp",
+   "plan": "large",
+   "chapitre": null
+  },
+  {
+   "id": "03_verset",
+   "debut": 35.67,
+   "fin": 47.842,
+   "decor": "chapelle",
+   "plan": "large",
+   "chapitre": null
+  },
+  {
+   "id": "04_contexte",
+   "debut": 47.842,
+   "fin": 82.82,
+   "decor": "sommet",
+   "plan": "alterne",
+   "chapitre": "Le contexte"
+  },
+  {
+   "id": "05_sens",
+   "debut": 82.82,
+   "fin": 133.066,
+   "decor": "chapelle",
+   "plan": "alterne",
+   "chapitre": "Ce que ça veut dire"
+  },
+  {
+   "id": "06_pour_toi",
+   "debut": 133.066,
+   "fin": 164.823,
+   "decor": "feu de camp",
+   "plan": "alterne",
+   "chapitre": "Pour toi, aujourd'hui"
+  },
+  {
+   "id": "07_cta",
+   "debut": 164.823,
+   "fin": 178.004,
+   "decor": "feu de camp",
+   "plan": "serre",
+   "chapitre": null
+  },
+  {
+   "id": "08_priere",
+   "debut": 178.004,
+   "fin": 205.069,
+   "decor": "chambre",
+   "plan": "large",
+   "chapitre": "Prions ensemble"
+  },
+  {
+   "id": "09_fin",
+   "debut": 205.069,
+   "fin": 225.069,
+   "decor": "chambre",
+   "plan": "fin",
+   "chapitre": null
+  }
+ ],
+ "voix": [
+  {
+   "bloc": "01_accroche",
+   "debut": 0.0,
+   "fichier_original": "voix/01_accroche.mp3"
+  },
+  {
+   "bloc": "02_bienvenue",
+   "debut": 24.086,
+   "fichier_original": "voix/02_bienvenue.mp3"
+  },
+  {
+   "bloc": "03_verset",
+   "debut": 35.67,
+   "fichier_original": "voix/03_verset.mp3"
+  },
+  {
+   "bloc": "04_contexte",
+   "debut": 47.842,
+   "fichier_original": "voix/04_contexte.mp3"
+  },
+  {
+   "bloc": "05_sens",
+   "debut": 82.82,
+   "fichier_original": "voix/05_sens.mp3"
+  },
+  {
+   "bloc": "06_pour_toi",
+   "debut": 133.066,
+   "fichier_original": "voix/06_pour_toi.mp3"
+  },
+  {
+   "bloc": "07_cta",
+   "debut": 164.823,
+   "fichier_original": "voix/07_cta.mp3"
+  },
+  {
+   "bloc": "08_priere",
+   "debut": 178.004,
+   "fichier_original": "voix/08_priere.mp3"
+  },
+  {
+   "bloc": "09_fin",
+   "debut": 205.069,
+   "fichier_original": "voix/09_fin.mp3"
+  }
+ ],
+ "textes_a_l_ecran": [
+  {
+   "type": "verset",
+   "debut": 35.67,
+   "fin": 47.842,
+   "reference": "Psaume 23:4",
+   "traduction": "Louis Segond 1910",
+   "texte": "Quand je marche dans la vallée de l'ombre de la mort, je ne crains aucun mal, car tu es avec moi : ta houlette et ton bâton me rassurent.",
+   "mots": [
+    {
+     "t": 35.82,
+     "texte": "Quand"
+    },
+    {
+     "t": 36.191,
+     "texte": "je"
+    },
+    {
+     "t": 36.391,
+     "texte": "marche"
+    },
+    {
+     "t": 36.818,
+     "texte": "dans"
+    },
+    {
+     "t": 37.132,
+     "texte": "la"
+    },
+    {
+     "t": 37.332,
+     "texte": "vallée"
+    },
+    {
+     "t": 37.76,
+     "texte": "de"
+    },
+    {
+     "t": 37.959,
+     "texte": "l'ombre"
+    },
+    {
+     "t": 38.387,
+     "texte": "de"
+    },
+    {
+     "t": 38.587,
+     "texte": "la"
+    },
+    {
+     "t": 38.786,
+     "texte": "mort,"
+    },
+    {
+     "t": 39.695,
+     "texte": "je"
+    },
+    {
+     "t": 39.951,
+     "texte": "ne"
+    },
+    {
+     "t": 40.207,
+     "texte": "crains"
+    },
+    {
+     "t": 40.756,
+     "texte": "aucun"
+    },
+    {
+     "t": 41.231,
+     "texte": "mal,"
+    },
+    {
+     "t": 41.668,
+     "texte": "car"
+    },
+    {
+     "t": 41.998,
+     "texte": "tu"
+    },
+    {
+     "t": 42.254,
+     "texte": "es"
+    },
+    {
+     "t": 42.51,
+     "texte": "avec"
+    },
+    {
+     "t": 42.913,
+     "texte": "moi :"
+    },
+    {
+     "t": 43.761,
+     "texte": "ta"
+    },
+    {
+     "t": 43.943,
+     "texte": "houlette"
+    },
+    {
+     "t": 44.438,
+     "texte": "et"
+    },
+    {
+     "t": 44.62,
+     "texte": "ton"
+    },
+    {
+     "t": 44.854,
+     "texte": "bâton"
+    },
+    {
+     "t": 45.192,
+     "texte": "me"
+    },
+    {
+     "t": 45.374,
+     "texte": "rassurent."
+    }
+   ]
+  },
+  {
+   "type": "chapitre",
+   "debut": 48.142,
+   "fin": 51.842,
+   "numero": 1,
+   "total": 4,
+   "titre": "Le contexte"
+  },
+  {
+   "type": "chapitre",
+   "debut": 83.12,
+   "fin": 86.82,
+   "numero": 2,
+   "total": 4,
+   "titre": "Ce que ça veut dire"
+  },
+  {
+   "type": "citation",
+   "texte": "Versets 1 à 3 : « Il » · Verset 4 : « TU es avec moi »",
+   "source": "Le psaume passe du « il » au « tu »",
+   "debut": 85.587,
+   "fin": 92.587
+  },
+  {
+   "type": "mot",
+   "hebreu": "צַלְמָוֶת",
+   "translit": "tsalmavet",
+   "sens": "« ombre de la mort » · « obscurité la plus profonde »",
+   "debut": 106.165,
+   "fin": 114.165
+  },
+  {
+   "type": "chapitre",
+   "debut": 133.366,
+   "fin": 137.066,
+   "numero": 3,
+   "total": 4,
+   "titre": "Pour toi, aujourd'hui"
+  },
+  {
+   "type": "citation",
+   "texte": "« Je suis le bon berger. Le bon berger donne sa vie pour ses brebis. »",
+   "source": "Jean 10:11",
+   "debut": 153.009,
+   "fin": 160.009
+  },
+  {
+   "type": "abonnement",
+   "debut": 165.023,
+   "fin": 177.904,
+   "plateforme": "youtube",
+   "texte": "Un verset par jour",
+   "clic": 166.523
+  },
+  {
+   "type": "commentaire",
+   "debut": 170.359,
+   "fin": 177.904,
+   "texte": "Écris en commentaire : « Tu es avec moi »"
+  },
+  {
+   "type": "chapitre",
+   "debut": 178.304,
+   "fin": 182.004,
+   "numero": 4,
+   "total": 4,
+   "titre": "Prions ensemble"
+  },
+  {
+   "type": "ecran_de_fin",
+   "debut": 205.369,
+   "fin": 225.069,
+   "texte": "À demain pour un nouveau verset",
+   "note": "éléments YouTube (vidéo suivante + s'abonner) à poser dans YouTube Studio, à droite"
+  }
+ ],
+ "sous_titres": [
+  {
+   "debut": 0.17,
+   "fin": 3.016,
+   "texte": "Il est tard. La maison est silencieuse…",
+   "mots": [
+    {
+     "debut": 0.22,
+     "fin": 0.411,
+     "texte": "Il"
+    },
+    {
+     "debut": 0.411,
+     "fin": 0.656,
+     "texte": "est"
+    },
+    {
+     "debut": 0.656,
+     "fin": 0.956,
+     "texte": "tard."
+    },
+    {
+     "debut": 1.199,
+     "fin": 1.4,
+     "texte": "La"
+    },
+    {
+     "debut": 1.4,
+     "fin": 1.829,
+     "texte": "maison"
+    },
+    {
+     "debut": 1.829,
+     "fin": 2.086,
+     "texte": "est"
+    },
+    {
+     "debut": 2.086,
+     "fin": 2.801,
+     "texte": "silencieuse…"
+    }
+   ]
+  },
+  {
+   "debut": 3.016,
+   "fin": 6.781,
+   "texte": "mais dans ta tête, ça ne s'arrête pas. Les soucis.",
+   "mots": [
+    {
+     "debut": 3.066,
+     "fin": 3.292,
+     "texte": "mais"
+    },
+    {
+     "debut": 3.292,
+     "fin": 3.519,
+     "texte": "dans"
+    },
+    {
+     "debut": 3.519,
+     "fin": 3.663,
+     "texte": "ta"
+    },
+    {
+     "debut": 3.663,
+     "fin": 3.889,
+     "texte": "tête,"
+    },
+    {
+     "debut": 3.963,
+     "fin": 4.107,
+     "texte": "ça"
+    },
+    {
+     "debut": 4.107,
+     "fin": 4.251,
+     "texte": "ne"
+    },
+    {
+     "debut": 4.251,
+     "fin": 4.601,
+     "texte": "s'arrête"
+    },
+    {
+     "debut": 4.601,
+     "fin": 4.787,
+     "texte": "pas."
+    },
+    {
+     "debut": 5.447,
+     "fin": 5.85,
+     "texte": "Les"
+    },
+    {
+     "debut": 5.85,
+     "fin": 6.52,
+     "texte": "soucis."
+    }
+   ]
+  },
+  {
+   "debut": 6.781,
+   "fin": 8.932,
+   "texte": "Les « et si… ». La peur.",
+   "mots": [
+    {
+     "debut": 6.831,
+     "fin": 7.071,
+     "texte": "Les"
+    },
+    {
+     "debut": 7.071,
+     "fin": 7.257,
+     "texte": "« et"
+    },
+    {
+     "debut": 7.257,
+     "fin": 7.444,
+     "texte": "si… »."
+    },
+    {
+     "debut": 7.649,
+     "fin": 7.791,
+     "texte": "La"
+    },
+    {
+     "debut": 7.791,
+     "fin": 8.015,
+     "texte": "peur."
+    }
+   ]
+  },
+  {
+   "debut": 8.932,
+   "fin": 10.715,
+   "texte": "Il y a trois mille ans,",
+   "mots": [
+    {
+     "debut": 8.982,
+     "fin": 9.206,
+     "texte": "Il"
+    },
+    {
+     "debut": 9.206,
+     "fin": 9.367,
+     "texte": "y"
+    },
+    {
+     "debut": 9.367,
+     "fin": 9.527,
+     "texte": "a"
+    },
+    {
+     "debut": 9.527,
+     "fin": 9.944,
+     "texte": "trois"
+    },
+    {
+     "debut": 9.944,
+     "fin": 10.361,
+     "texte": "mille"
+    },
+    {
+     "debut": 10.361,
+     "fin": 10.65,
+     "texte": "ans,"
+    }
+   ]
+  },
+  {
+   "debut": 10.715,
+   "fin": 15.23,
+   "texte": "un homme a écrit une phrase pour exactement ce moment-là.",
+   "mots": [
+    {
+     "debut": 10.765,
+     "fin": 10.99,
+     "texte": "un"
+    },
+    {
+     "debut": 10.99,
+     "fin": 11.407,
+     "texte": "homme"
+    },
+    {
+     "debut": 11.407,
+     "fin": 11.568,
+     "texte": "a"
+    },
+    {
+     "debut": 11.568,
+     "fin": 11.985,
+     "texte": "écrit"
+    },
+    {
+     "debut": 11.985,
+     "fin": 12.274,
+     "texte": "une"
+    },
+    {
+     "debut": 12.274,
+     "fin": 12.755,
+     "texte": "phrase"
+    },
+    {
+     "debut": 12.755,
+     "fin": 13.108,
+     "texte": "pour"
+    },
+    {
+     "debut": 13.108,
+     "fin": 13.846,
+     "texte": "exactement"
+    },
+    {
+     "debut": 13.846,
+     "fin": 14.071,
+     "texte": "ce"
+    },
+    {
+     "debut": 14.071,
+     "fin": 14.68,
+     "texte": "moment-là."
+    }
+   ]
+  },
+  {
+   "debut": 15.23,
+   "fin": 17.51,
+   "texte": "Ce soir, on la lit ensemble.",
+   "mots": [
+    {
+     "debut": 15.28,
+     "fin": 15.471,
+     "texte": "Ce"
+    },
+    {
+     "debut": 15.471,
+     "fin": 15.77,
+     "texte": "soir,"
+    },
+    {
+     "debut": 15.867,
+     "fin": 16.058,
+     "texte": "on"
+    },
+    {
+     "debut": 16.058,
+     "fin": 16.248,
+     "texte": "la"
+    },
+    {
+     "debut": 16.248,
+     "fin": 16.493,
+     "texte": "lit"
+    },
+    {
+     "debut": 16.493,
+     "fin": 17.01,
+     "texte": "ensemble."
+    }
+   ]
+  },
+  {
+   "debut": 24.126,
+   "fin": 28.926,
+   "texte": "Bienvenue au coin du feu. Ici, chaque jour, on prend un seul verset…",
+   "mots": [
+    {
+     "debut": 24.176,
+     "fin": 24.702,
+     "texte": "Bienvenue"
+    },
+    {
+     "debut": 24.702,
+     "fin": 24.877,
+     "texte": "au"
+    },
+    {
+     "debut": 24.877,
+     "fin": 25.152,
+     "texte": "coin"
+    },
+    {
+     "debut": 25.152,
+     "fin": 25.328,
+     "texte": "du"
+    },
+    {
+     "debut": 25.328,
+     "fin": 25.553,
+     "texte": "feu."
+    },
+    {
+     "debut": 26.077,
+     "fin": 26.318,
+     "texte": "Ici,"
+    },
+    {
+     "debut": 26.414,
+     "fin": 26.816,
+     "texte": "chaque"
+    },
+    {
+     "debut": 26.816,
+     "fin": 27.111,
+     "texte": "jour,"
+    },
+    {
+     "debut": 27.207,
+     "fin": 27.394,
+     "texte": "on"
+    },
+    {
+     "debut": 27.394,
+     "fin": 27.743,
+     "texte": "prend"
+    },
+    {
+     "debut": 27.743,
+     "fin": 27.93,
+     "texte": "un"
+    },
+    {
+     "debut": 27.93,
+     "fin": 28.225,
+     "texte": "seul"
+    },
+    {
+     "debut": 28.225,
+     "fin": 28.627,
+     "texte": "verset…"
+    }
+   ]
+  },
+  {
+   "debut": 28.926,
+   "fin": 32.728,
+   "texte": "et on prend le temps de le comprendre.",
+   "mots": [
+    {
+     "debut": 28.976,
+     "fin": 29.242,
+     "texte": "et"
+    },
+    {
+     "debut": 29.242,
+     "fin": 29.508,
+     "texte": "on"
+    },
+    {
+     "debut": 29.508,
+     "fin": 30.003,
+     "texte": "prend"
+    },
+    {
+     "debut": 30.003,
+     "fin": 30.269,
+     "texte": "le"
+    },
+    {
+     "debut": 30.269,
+     "fin": 30.764,
+     "texte": "temps"
+    },
+    {
+     "debut": 30.764,
+     "fin": 31.03,
+     "texte": "de"
+    },
+    {
+     "debut": 31.03,
+     "fin": 31.296,
+     "texte": "le"
+    },
+    {
+     "debut": 31.296,
+     "fin": 32.171,
+     "texte": "comprendre."
+    }
+   ]
+  },
+  {
+   "debut": 32.728,
+   "fin": 35.016,
+   "texte": "Aujourd'hui : le Psaume 23, verset 4.",
+   "mots": [
+    {
+     "debut": 32.778,
+     "fin": 33.283,
+     "texte": "Aujourd'hui :"
+    },
+    {
+     "debut": 33.362,
+     "fin": 33.515,
+     "texte": "le"
+    },
+    {
+     "debut": 33.515,
+     "fin": 33.845,
+     "texte": "Psaume"
+    },
+    {
+     "debut": 33.845,
+     "fin": 33.998,
+     "texte": "23,"
+    },
+    {
+     "debut": 34.077,
+     "fin": 34.406,
+     "texte": "verset"
+    },
+    {
+     "debut": 34.406,
+     "fin": 34.516,
+     "texte": "4."
+    }
+   ]
+  },
+  {
+   "debut": 48.012,
+   "fin": 51.164,
+   "texte": "Ce psaume est attribué à David. Avant d'être roi,",
+   "mots": [
+    {
+     "debut": 48.062,
+     "fin": 48.267,
+     "texte": "Ce"
+    },
+    {
+     "debut": 48.267,
+     "fin": 48.705,
+     "texte": "psaume"
+    },
+    {
+     "debut": 48.705,
+     "fin": 48.969,
+     "texte": "est"
+    },
+    {
+     "debut": 48.969,
+     "fin": 49.525,
+     "texte": "attribué"
+    },
+    {
+     "debut": 49.525,
+     "fin": 49.671,
+     "texte": "à"
+    },
+    {
+     "debut": 49.671,
+     "fin": 50.051,
+     "texte": "David."
+    },
+    {
+     "debut": 50.527,
+     "fin": 50.759,
+     "texte": "Avant"
+    },
+    {
+     "debut": 50.759,
+     "fin": 50.99,
+     "texte": "d'être"
+    },
+    {
+     "debut": 50.99,
+     "fin": 51.15,
+     "texte": "roi,"
+    }
+   ]
+  },
+  {
+   "debut": 51.164,
+   "fin": 53.171,
+   "texte": "David était berger. Il a passé des nuits dehors à garder ses",
+   "mots": [
+    {
+     "debut": 51.214,
+     "fin": 51.446,
+     "texte": "David"
+    },
+    {
+     "debut": 51.446,
+     "fin": 51.677,
+     "texte": "était"
+    },
+    {
+     "debut": 51.677,
+     "fin": 51.944,
+     "texte": "berger."
+    },
+    {
+     "debut": 52.077,
+     "fin": 52.165,
+     "texte": "Il"
+    },
+    {
+     "debut": 52.165,
+     "fin": 52.227,
+     "texte": "a"
+    },
+    {
+     "debut": 52.227,
+     "fin": 52.391,
+     "texte": "passé"
+    },
+    {
+     "debut": 52.391,
+     "fin": 52.504,
+     "texte": "des"
+    },
+    {
+     "debut": 52.504,
+     "fin": 52.668,
+     "texte": "nuits"
+    },
+    {
+     "debut": 52.668,
+     "fin": 52.856,
+     "texte": "dehors"
+    },
+    {
+     "debut": 52.856,
+     "fin": 52.919,
+     "texte": "à"
+    },
+    {
+     "debut": 52.919,
+     "fin": 53.108,
+     "texte": "garder"
+    },
+    {
+     "debut": 53.108,
+     "fin": 53.221,
+     "texte": "ses"
+    }
+   ]
+  },
+  {
+   "debut": 53.171,
+   "fin": 56.662,
+   "texte": "brebis… et à les défendre contre le lion et l'ours.",
+   "mots": [
+    {
+     "debut": 53.221,
+     "fin": 53.409,
+     "texte": "brebis…"
+    },
+    {
+     "debut": 53.62,
+     "fin": 53.806,
+     "texte": "et"
+    },
+    {
+     "debut": 53.806,
+     "fin": 53.939,
+     "texte": "à"
+    },
+    {
+     "debut": 53.939,
+     "fin": 54.178,
+     "texte": "les"
+    },
+    {
+     "debut": 54.178,
+     "fin": 54.684,
+     "texte": "défendre"
+    },
+    {
+     "debut": 54.684,
+     "fin": 55.082,
+     "texte": "contre"
+    },
+    {
+     "debut": 55.082,
+     "fin": 55.269,
+     "texte": "le"
+    },
+    {
+     "debut": 55.269,
+     "fin": 55.561,
+     "texte": "lion"
+    },
+    {
+     "debut": 55.561,
+     "fin": 55.747,
+     "texte": "et"
+    },
+    {
+     "debut": 55.747,
+     "fin": 56.093,
+     "texte": "l'ours."
+    }
+   ]
+  },
+  {
+   "debut": 56.662,
+   "fin": 60.176,
+   "texte": "Alors quand il écrit « L'Éternel est mon berger »,",
+   "mots": [
+    {
+     "debut": 56.712,
+     "fin": 57.161,
+     "texte": "Alors"
+    },
+    {
+     "debut": 57.161,
+     "fin": 57.611,
+     "texte": "quand"
+    },
+    {
+     "debut": 57.611,
+     "fin": 57.853,
+     "texte": "il"
+    },
+    {
+     "debut": 57.853,
+     "fin": 58.303,
+     "texte": "écrit"
+    },
+    {
+     "debut": 58.303,
+     "fin": 58.961,
+     "texte": "« L'Éternel"
+    },
+    {
+     "debut": 58.961,
+     "fin": 59.272,
+     "texte": "est"
+    },
+    {
+     "debut": 59.272,
+     "fin": 59.583,
+     "texte": "mon"
+    },
+    {
+     "debut": 59.583,
+     "fin": 60.102,
+     "texte": "berger »,"
+    }
+   ]
+  },
+  {
+   "debut": 60.176,
+   "fin": 64.482,
+   "texte": "ce n'est pas une jolie image. C'est son métier.",
+   "mots": [
+    {
+     "debut": 60.226,
+     "fin": 60.468,
+     "texte": "ce"
+    },
+    {
+     "debut": 60.468,
+     "fin": 60.849,
+     "texte": "n'est"
+    },
+    {
+     "debut": 60.849,
+     "fin": 61.16,
+     "texte": "pas"
+    },
+    {
+     "debut": 61.16,
+     "fin": 61.472,
+     "texte": "une"
+    },
+    {
+     "debut": 61.472,
+     "fin": 61.922,
+     "texte": "jolie"
+    },
+    {
+     "debut": 61.922,
+     "fin": 62.371,
+     "texte": "image."
+    },
+    {
+     "debut": 62.644,
+     "fin": 62.952,
+     "texte": "C'est"
+    },
+    {
+     "debut": 62.952,
+     "fin": 63.205,
+     "texte": "son"
+    },
+    {
+     "debut": 63.205,
+     "fin": 63.625,
+     "texte": "métier."
+    }
+   ]
+  },
+  {
+   "debut": 64.482,
+   "fin": 66.584,
+   "texte": "En Judée, pour mener le troupeau vers l'eau,",
+   "mots": [
+    {
+     "debut": 64.532,
+     "fin": 64.681,
+     "texte": "En"
+    },
+    {
+     "debut": 64.681,
+     "fin": 64.956,
+     "texte": "Judée,"
+    },
+    {
+     "debut": 65.032,
+     "fin": 65.265,
+     "texte": "pour"
+    },
+    {
+     "debut": 65.265,
+     "fin": 65.541,
+     "texte": "mener"
+    },
+    {
+     "debut": 65.541,
+     "fin": 65.689,
+     "texte": "le"
+    },
+    {
+     "debut": 65.689,
+     "fin": 66.092,
+     "texte": "troupeau"
+    },
+    {
+     "debut": 66.092,
+     "fin": 66.325,
+     "texte": "vers"
+    },
+    {
+     "debut": 66.325,
+     "fin": 66.558,
+     "texte": "l'eau,"
+    }
+   ]
+  },
+  {
+   "debut": 66.584,
+   "fin": 69.025,
+   "texte": "il fallait parfois passer par des ravins étroits.",
+   "mots": [
+    {
+     "debut": 66.634,
+     "fin": 66.782,
+     "texte": "il"
+    },
+    {
+     "debut": 66.782,
+     "fin": 67.142,
+     "texte": "fallait"
+    },
+    {
+     "debut": 67.142,
+     "fin": 67.502,
+     "texte": "parfois"
+    },
+    {
+     "debut": 67.502,
+     "fin": 67.82,
+     "texte": "passer"
+    },
+    {
+     "debut": 67.82,
+     "fin": 68.011,
+     "texte": "par"
+    },
+    {
+     "debut": 68.011,
+     "fin": 68.202,
+     "texte": "des"
+    },
+    {
+     "debut": 68.202,
+     "fin": 68.519,
+     "texte": "ravins"
+    },
+    {
+     "debut": 68.519,
+     "fin": 68.88,
+     "texte": "étroits."
+    }
+   ]
+  },
+  {
+   "debut": 69.025,
+   "fin": 71.629,
+   "texte": "Des passages où le soleil n'entre presque pas…",
+   "mots": [
+    {
+     "debut": 69.075,
+     "fin": 69.287,
+     "texte": "Des"
+    },
+    {
+     "debut": 69.287,
+     "fin": 69.736,
+     "texte": "passages"
+    },
+    {
+     "debut": 69.736,
+     "fin": 69.902,
+     "texte": "où"
+    },
+    {
+     "debut": 69.902,
+     "fin": 70.067,
+     "texte": "le"
+    },
+    {
+     "debut": 70.067,
+     "fin": 70.421,
+     "texte": "soleil"
+    },
+    {
+     "debut": 70.421,
+     "fin": 70.776,
+     "texte": "n'entre"
+    },
+    {
+     "debut": 70.776,
+     "fin": 71.177,
+     "texte": "presque"
+    },
+    {
+     "debut": 71.177,
+     "fin": 71.39,
+     "texte": "pas…"
+    }
+   ]
+  },
+  {
+   "debut": 71.629,
+   "fin": 74.434,
+   "texte": "et où les bêtes sauvages attendent.",
+   "mots": [
+    {
+     "debut": 71.679,
+     "fin": 71.89,
+     "texte": "et"
+    },
+    {
+     "debut": 71.89,
+     "fin": 72.101,
+     "texte": "où"
+    },
+    {
+     "debut": 72.101,
+     "fin": 72.373,
+     "texte": "les"
+    },
+    {
+     "debut": 72.373,
+     "fin": 72.765,
+     "texte": "bêtes"
+    },
+    {
+     "debut": 72.765,
+     "fin": 73.338,
+     "texte": "sauvages"
+    },
+    {
+     "debut": 73.338,
+     "fin": 73.972,
+     "texte": "attendent."
+    }
+   ]
+  },
+  {
+   "debut": 74.434,
+   "fin": 78.329,
+   "texte": "Voilà la vallée dont parle David. Pas une idée.",
+   "mots": [
+    {
+     "debut": 74.484,
+     "fin": 74.751,
+     "texte": "Voilà"
+    },
+    {
+     "debut": 74.751,
+     "fin": 74.895,
+     "texte": "la"
+    },
+    {
+     "debut": 74.895,
+     "fin": 75.203,
+     "texte": "vallée"
+    },
+    {
+     "debut": 75.203,
+     "fin": 75.429,
+     "texte": "dont"
+    },
+    {
+     "debut": 75.429,
+     "fin": 75.696,
+     "texte": "parle"
+    },
+    {
+     "debut": 75.696,
+     "fin": 75.963,
+     "texte": "David."
+    },
+    {
+     "debut": 76.306,
+     "fin": 76.833,
+     "texte": "Pas"
+    },
+    {
+     "debut": 76.833,
+     "fin": 77.359,
+     "texte": "une"
+    },
+    {
+     "debut": 77.359,
+     "fin": 78.002,
+     "texte": "idée."
+    }
+   ]
+  },
+  {
+   "debut": 78.329,
+   "fin": 82.91,
+   "texte": "Un vrai lieu… où l'on a vraiment peur.",
+   "mots": [
+    {
+     "debut": 78.379,
+     "fin": 78.575,
+     "texte": "Un"
+    },
+    {
+     "debut": 78.575,
+     "fin": 78.883,
+     "texte": "vrai"
+    },
+    {
+     "debut": 78.883,
+     "fin": 79.191,
+     "texte": "lieu…"
+    },
+    {
+     "debut": 79.571,
+     "fin": 79.869,
+     "texte": "où"
+    },
+    {
+     "debut": 79.869,
+     "fin": 80.252,
+     "texte": "l'on"
+    },
+    {
+     "debut": 80.252,
+     "fin": 80.465,
+     "texte": "a"
+    },
+    {
+     "debut": 80.465,
+     "fin": 81.274,
+     "texte": "vraiment"
+    },
+    {
+     "debut": 81.274,
+     "fin": 81.742,
+     "texte": "peur."
+    }
+   ]
+  },
+  {
+   "debut": 82.91,
+   "fin": 84.584,
+   "texte": "Regarde un détail que beaucoup ne remarquent pas.",
+   "mots": [
+    {
+     "debut": 82.96,
+     "fin": 83.176,
+     "texte": "Regarde"
+    },
+    {
+     "debut": 83.176,
+     "fin": 83.265,
+     "texte": "un"
+    },
+    {
+     "debut": 83.265,
+     "fin": 83.456,
+     "texte": "détail"
+    },
+    {
+     "debut": 83.456,
+     "fin": 83.57,
+     "texte": "que"
+    },
+    {
+     "debut": 83.57,
+     "fin": 83.811,
+     "texte": "beaucoup"
+    },
+    {
+     "debut": 83.811,
+     "fin": 83.9,
+     "texte": "ne"
+    },
+    {
+     "debut": 83.9,
+     "fin": 84.193,
+     "texte": "remarquent"
+    },
+    {
+     "debut": 84.193,
+     "fin": 84.307,
+     "texte": "pas."
+    }
+   ]
+  },
+  {
+   "debut": 84.584,
+   "fin": 86.418,
+   "texte": "Au début du psaume, David parle DE Dieu :",
+   "mots": [
+    {
+     "debut": 84.634,
+     "fin": 84.772,
+     "texte": "Au"
+    },
+    {
+     "debut": 84.772,
+     "fin": 85.028,
+     "texte": "début"
+    },
+    {
+     "debut": 85.028,
+     "fin": 85.166,
+     "texte": "du"
+    },
+    {
+     "debut": 85.166,
+     "fin": 85.461,
+     "texte": "psaume,"
+    },
+    {
+     "debut": 85.532,
+     "fin": 85.787,
+     "texte": "David"
+    },
+    {
+     "debut": 85.787,
+     "fin": 86.043,
+     "texte": "parle"
+    },
+    {
+     "debut": 86.043,
+     "fin": 86.181,
+     "texte": "DE"
+    },
+    {
+     "debut": 86.181,
+     "fin": 86.397,
+     "texte": "Dieu :"
+    }
+   ]
+  },
+  {
+   "debut": 86.418,
+   "fin": 90.401,
+   "texte": "« Il me fait reposer… Il me conduit… » Mais au verset 4,",
+   "mots": [
+    {
+     "debut": 86.468,
+     "fin": 86.606,
+     "texte": "« Il"
+    },
+    {
+     "debut": 86.606,
+     "fin": 86.744,
+     "texte": "me"
+    },
+    {
+     "debut": 86.744,
+     "fin": 86.96,
+     "texte": "fait"
+    },
+    {
+     "debut": 86.96,
+     "fin": 87.295,
+     "texte": "reposer…"
+    },
+    {
+     "debut": 87.571,
+     "fin": 87.794,
+     "texte": "Il"
+    },
+    {
+     "debut": 87.794,
+     "fin": 88.016,
+     "texte": "me"
+    },
+    {
+     "debut": 88.016,
+     "fin": 88.556,
+     "texte": "conduit… »"
+    },
+    {
+     "debut": 89.236,
+     "fin": 89.557,
+     "texte": "Mais"
+    },
+    {
+     "debut": 89.557,
+     "fin": 89.762,
+     "texte": "au"
+    },
+    {
+     "debut": 89.762,
+     "fin": 90.2,
+     "texte": "verset"
+    },
+    {
+     "debut": 90.2,
+     "fin": 90.346,
+     "texte": "4,"
+    }
+   ]
+  },
+  {
+   "debut": 90.401,
+   "fin": 94.783,
+   "texte": "au moment le plus sombre… il se met à parler À Dieu.",
+   "mots": [
+    {
+     "debut": 90.451,
+     "fin": 90.656,
+     "texte": "au"
+    },
+    {
+     "debut": 90.656,
+     "fin": 91.094,
+     "texte": "moment"
+    },
+    {
+     "debut": 91.094,
+     "fin": 91.298,
+     "texte": "le"
+    },
+    {
+     "debut": 91.298,
+     "fin": 91.62,
+     "texte": "plus"
+    },
+    {
+     "debut": 91.62,
+     "fin": 92.058,
+     "texte": "sombre…"
+    },
+    {
+     "debut": 92.385,
+     "fin": 92.607,
+     "texte": "il"
+    },
+    {
+     "debut": 92.607,
+     "fin": 92.828,
+     "texte": "se"
+    },
+    {
+     "debut": 92.828,
+     "fin": 93.113,
+     "texte": "met"
+    },
+    {
+     "debut": 93.113,
+     "fin": 93.271,
+     "texte": "à"
+    },
+    {
+     "debut": 93.271,
+     "fin": 93.745,
+     "texte": "parler"
+    },
+    {
+     "debut": 93.745,
+     "fin": 93.903,
+     "texte": "À"
+    },
+    {
+     "debut": 93.903,
+     "fin": 94.251,
+     "texte": "Dieu."
+    }
+   ]
+  },
+  {
+   "debut": 94.783,
+   "fin": 96.971,
+   "texte": "« Car TU es avec moi. »",
+   "mots": [
+    {
+     "debut": 94.833,
+     "fin": 95.067,
+     "texte": "« Car"
+    },
+    {
+     "debut": 95.067,
+     "fin": 95.249,
+     "texte": "TU"
+    },
+    {
+     "debut": 95.249,
+     "fin": 95.431,
+     "texte": "es"
+    },
+    {
+     "debut": 95.431,
+     "fin": 95.717,
+     "texte": "avec"
+    },
+    {
+     "debut": 95.717,
+     "fin": 95.951,
+     "texte": "moi. »"
+    }
+   ]
+  },
+  {
+   "debut": 96.971,
+   "fin": 100.058,
+   "texte": "Dans la vallée, Dieu n'est plus un sujet.",
+   "mots": [
+    {
+     "debut": 97.021,
+     "fin": 97.373,
+     "texte": "Dans"
+    },
+    {
+     "debut": 97.373,
+     "fin": 97.598,
+     "texte": "la"
+    },
+    {
+     "debut": 97.598,
+     "fin": 98.078,
+     "texte": "vallée,"
+    },
+    {
+     "debut": 98.193,
+     "fin": 98.545,
+     "texte": "Dieu"
+    },
+    {
+     "debut": 98.545,
+     "fin": 98.898,
+     "texte": "n'est"
+    },
+    {
+     "debut": 98.898,
+     "fin": 99.25,
+     "texte": "plus"
+    },
+    {
+     "debut": 99.25,
+     "fin": 99.474,
+     "texte": "un"
+    },
+    {
+     "debut": 99.474,
+     "fin": 99.891,
+     "texte": "sujet."
+    }
+   ]
+  },
+  {
+   "debut": 100.058,
+   "fin": 102.049,
+   "texte": "Il devient quelqu'un à qui l'on parle.",
+   "mots": [
+    {
+     "debut": 100.108,
+     "fin": 100.234,
+     "texte": "Il"
+    },
+    {
+     "debut": 100.234,
+     "fin": 100.538,
+     "texte": "devient"
+    },
+    {
+     "debut": 100.538,
+     "fin": 100.879,
+     "texte": "quelqu'un"
+    },
+    {
+     "debut": 100.879,
+     "fin": 100.969,
+     "texte": "à"
+    },
+    {
+     "debut": 100.969,
+     "fin": 101.13,
+     "texte": "qui"
+    },
+    {
+     "debut": 101.13,
+     "fin": 101.291,
+     "texte": "l'on"
+    },
+    {
+     "debut": 101.291,
+     "fin": 101.524,
+     "texte": "parle."
+    }
+   ]
+  },
+  {
+   "debut": 102.049,
+   "fin": 107.502,
+   "texte": "Le mot hébreu traduit par « ombre de la mort », c'est tsalmavet.",
+   "mots": [
+    {
+     "debut": 102.099,
+     "fin": 102.372,
+     "texte": "Le"
+    },
+    {
+     "debut": 102.372,
+     "fin": 102.722,
+     "texte": "mot"
+    },
+    {
+     "debut": 102.722,
+     "fin": 103.306,
+     "texte": "hébreu"
+    },
+    {
+     "debut": 103.306,
+     "fin": 103.968,
+     "texte": "traduit"
+    },
+    {
+     "debut": 103.968,
+     "fin": 104.318,
+     "texte": "par"
+    },
+    {
+     "debut": 104.318,
+     "fin": 104.824,
+     "texte": "« ombre"
+    },
+    {
+     "debut": 104.824,
+     "fin": 105.097,
+     "texte": "de"
+    },
+    {
+     "debut": 105.097,
+     "fin": 105.369,
+     "texte": "la"
+    },
+    {
+     "debut": 105.369,
+     "fin": 105.798,
+     "texte": "mort »,"
+    },
+    {
+     "debut": 105.937,
+     "fin": 106.365,
+     "texte": "c'est"
+    },
+    {
+     "debut": 106.365,
+     "fin": 107.261,
+     "texte": "tsalmavet."
+    }
+   ]
+  },
+  {
+   "debut": 107.502,
+   "fin": 110.729,
+   "texte": "On peut aussi le comprendre comme « l'obscurité la plus",
+   "mots": [
+    {
+     "debut": 107.552,
+     "fin": 107.749,
+     "texte": "On"
+    },
+    {
+     "debut": 107.749,
+     "fin": 108.057,
+     "texte": "peut"
+    },
+    {
+     "debut": 108.057,
+     "fin": 108.422,
+     "texte": "aussi"
+    },
+    {
+     "debut": 108.422,
+     "fin": 108.619,
+     "texte": "le"
+    },
+    {
+     "debut": 108.619,
+     "fin": 109.264,
+     "texte": "comprendre"
+    },
+    {
+     "debut": 109.264,
+     "fin": 109.628,
+     "texte": "comme"
+    },
+    {
+     "debut": 109.628,
+     "fin": 110.274,
+     "texte": "« l'obscurité"
+    },
+    {
+     "debut": 110.274,
+     "fin": 110.47,
+     "texte": "la"
+    },
+    {
+     "debut": 110.47,
+     "fin": 110.779,
+     "texte": "plus"
+    }
+   ]
+  },
+  {
+   "debut": 110.729,
+   "fin": 113.736,
+   "texte": "profonde ». Et David ne dit pas : « il n'y a aucun mal ».",
+   "mots": [
+    {
+     "debut": 110.779,
+     "fin": 111.312,
+     "texte": "profonde »."
+    },
+    {
+     "debut": 111.8,
+     "fin": 111.942,
+     "texte": "Et"
+    },
+    {
+     "debut": 111.942,
+     "fin": 112.206,
+     "texte": "David"
+    },
+    {
+     "debut": 112.206,
+     "fin": 112.348,
+     "texte": "ne"
+    },
+    {
+     "debut": 112.348,
+     "fin": 112.53,
+     "texte": "dit"
+    },
+    {
+     "debut": 112.53,
+     "fin": 112.713,
+     "texte": "pas :"
+    },
+    {
+     "debut": 112.786,
+     "fin": 112.928,
+     "texte": "« il"
+    },
+    {
+     "debut": 112.928,
+     "fin": 113.07,
+     "texte": "n'y"
+    },
+    {
+     "debut": 113.07,
+     "fin": 113.171,
+     "texte": "a"
+    },
+    {
+     "debut": 113.171,
+     "fin": 113.435,
+     "texte": "aucun"
+    },
+    {
+     "debut": 113.435,
+     "fin": 113.617,
+     "texte": "mal »."
+    }
+   ]
+  },
+  {
+   "debut": 113.736,
+   "fin": 117.799,
+   "texte": "Il dit : « je ne crains aucun mal ». Le danger est toujours là.",
+   "mots": [
+    {
+     "debut": 113.786,
+     "fin": 113.917,
+     "texte": "Il"
+    },
+    {
+     "debut": 113.917,
+     "fin": 114.085,
+     "texte": "dit :"
+    },
+    {
+     "debut": 114.151,
+     "fin": 114.282,
+     "texte": "« je"
+    },
+    {
+     "debut": 114.282,
+     "fin": 114.412,
+     "texte": "ne"
+    },
+    {
+     "debut": 114.412,
+     "fin": 114.692,
+     "texte": "crains"
+    },
+    {
+     "debut": 114.692,
+     "fin": 114.934,
+     "texte": "aucun"
+    },
+    {
+     "debut": 114.934,
+     "fin": 115.102,
+     "texte": "mal »."
+    },
+    {
+     "debut": 115.63,
+     "fin": 115.865,
+     "texte": "Le"
+    },
+    {
+     "debut": 115.865,
+     "fin": 116.369,
+     "texte": "danger"
+    },
+    {
+     "debut": 116.369,
+     "fin": 116.671,
+     "texte": "est"
+    },
+    {
+     "debut": 116.671,
+     "fin": 117.309,
+     "texte": "toujours"
+    },
+    {
+     "debut": 117.309,
+     "fin": 117.544,
+     "texte": "là."
+    }
+   ]
+  },
+  {
+   "debut": 117.799,
+   "fin": 121.946,
+   "texte": "Mais la peur n'a plus le dernier mot.",
+   "mots": [
+    {
+     "debut": 117.849,
+     "fin": 118.251,
+     "texte": "Mais"
+    },
+    {
+     "debut": 118.251,
+     "fin": 118.507,
+     "texte": "la"
+    },
+    {
+     "debut": 118.507,
+     "fin": 118.909,
+     "texte": "peur"
+    },
+    {
+     "debut": 118.909,
+     "fin": 119.165,
+     "texte": "n'a"
+    },
+    {
+     "debut": 119.165,
+     "fin": 119.566,
+     "texte": "plus"
+    },
+    {
+     "debut": 119.566,
+     "fin": 119.822,
+     "texte": "le"
+    },
+    {
+     "debut": 119.822,
+     "fin": 120.443,
+     "texte": "dernier"
+    },
+    {
+     "debut": 120.443,
+     "fin": 120.772,
+     "texte": "mot."
+    }
+   ]
+  },
+  {
+   "debut": 121.946,
+   "fin": 125.657,
+   "texte": "La houlette et le bâton, ce sont les outils du berger :",
+   "mots": [
+    {
+     "debut": 121.996,
+     "fin": 122.205,
+     "texte": "La"
+    },
+    {
+     "debut": 122.205,
+     "fin": 122.773,
+     "texte": "houlette"
+    },
+    {
+     "debut": 122.773,
+     "fin": 122.982,
+     "texte": "et"
+    },
+    {
+     "debut": 122.982,
+     "fin": 123.192,
+     "texte": "le"
+    },
+    {
+     "debut": 123.192,
+     "fin": 123.58,
+     "texte": "bâton,"
+    },
+    {
+     "debut": 123.687,
+     "fin": 123.897,
+     "texte": "ce"
+    },
+    {
+     "debut": 123.897,
+     "fin": 124.225,
+     "texte": "sont"
+    },
+    {
+     "debut": 124.225,
+     "fin": 124.494,
+     "texte": "les"
+    },
+    {
+     "debut": 124.494,
+     "fin": 124.943,
+     "texte": "outils"
+    },
+    {
+     "debut": 124.943,
+     "fin": 125.152,
+     "texte": "du"
+    },
+    {
+     "debut": 125.152,
+     "fin": 125.6,
+     "texte": "berger :"
+    }
+   ]
+  },
+  {
+   "debut": 125.657,
+   "fin": 128.032,
+   "texte": "l'un pour défendre le troupeau…",
+   "mots": [
+    {
+     "debut": 125.707,
+     "fin": 125.976,
+     "texte": "l'un"
+    },
+    {
+     "debut": 125.976,
+     "fin": 126.305,
+     "texte": "pour"
+    },
+    {
+     "debut": 126.305,
+     "fin": 126.873,
+     "texte": "défendre"
+    },
+    {
+     "debut": 126.873,
+     "fin": 127.082,
+     "texte": "le"
+    },
+    {
+     "debut": 127.082,
+     "fin": 127.65,
+     "texte": "troupeau…"
+    }
+   ]
+  },
+  {
+   "debut": 128.032,
+   "fin": 133.146,
+   "texte": "l'autre pour le guider et le ramener.",
+   "mots": [
+    {
+     "debut": 128.082,
+     "fin": 128.839,
+     "texte": "l'autre"
+    },
+    {
+     "debut": 128.839,
+     "fin": 129.394,
+     "texte": "pour"
+    },
+    {
+     "debut": 129.394,
+     "fin": 129.748,
+     "texte": "le"
+    },
+    {
+     "debut": 129.748,
+     "fin": 130.505,
+     "texte": "guider"
+    },
+    {
+     "debut": 130.505,
+     "fin": 130.859,
+     "texte": "et"
+    },
+    {
+     "debut": 130.859,
+     "fin": 131.212,
+     "texte": "le"
+    },
+    {
+     "debut": 131.212,
+     "fin": 132.07,
+     "texte": "ramener."
+    }
+   ]
+  },
+  {
+   "debut": 133.146,
+   "fin": 137.052,
+   "texte": "Alors, pour toi, ce soir. Peut-être que tu traverses ta",
+   "mots": [
+    {
+     "debut": 133.196,
+     "fin": 133.31,
+     "texte": "Alors,"
+    },
+    {
+     "debut": 133.342,
+     "fin": 133.438,
+     "texte": "pour"
+    },
+    {
+     "debut": 133.438,
+     "fin": 133.517,
+     "texte": "toi,"
+    },
+    {
+     "debut": 133.549,
+     "fin": 133.61,
+     "texte": "ce"
+    },
+    {
+     "debut": 133.61,
+     "fin": 133.707,
+     "texte": "soir."
+    },
+    {
+     "debut": 134.253,
+     "fin": 135.113,
+     "texte": "Peut-être"
+    },
+    {
+     "debut": 135.113,
+     "fin": 135.52,
+     "texte": "que"
+    },
+    {
+     "debut": 135.52,
+     "fin": 135.836,
+     "texte": "tu"
+    },
+    {
+     "debut": 135.836,
+     "fin": 136.786,
+     "texte": "traverses"
+    },
+    {
+     "debut": 136.786,
+     "fin": 137.102,
+     "texte": "ta"
+    }
+   ]
+  },
+  {
+   "debut": 137.052,
+   "fin": 140.695,
+   "texte": "propre vallée. Un diagnostic. Une rupture. Un deuil.",
+   "mots": [
+    {
+     "debut": 137.102,
+     "fin": 137.781,
+     "texte": "propre"
+    },
+    {
+     "debut": 137.781,
+     "fin": 138.459,
+     "texte": "vallée."
+    },
+    {
+     "debut": 138.752,
+     "fin": 138.905,
+     "texte": "Un"
+    },
+    {
+     "debut": 138.905,
+     "fin": 139.41,
+     "texte": "diagnostic."
+    },
+    {
+     "debut": 139.566,
+     "fin": 139.691,
+     "texte": "Une"
+    },
+    {
+     "debut": 139.691,
+     "fin": 139.926,
+     "texte": "rupture."
+    },
+    {
+     "debut": 140.09,
+     "fin": 140.257,
+     "texte": "Un"
+    },
+    {
+     "debut": 140.257,
+     "fin": 140.567,
+     "texte": "deuil."
+    }
+   ]
+  },
+  {
+   "debut": 140.695,
+   "fin": 142.628,
+   "texte": "Une angoisse qui revient chaque nuit.",
+   "mots": [
+    {
+     "debut": 140.745,
+     "fin": 140.899,
+     "texte": "Une"
+    },
+    {
+     "debut": 140.899,
+     "fin": 141.222,
+     "texte": "angoisse"
+    },
+    {
+     "debut": 141.222,
+     "fin": 141.376,
+     "texte": "qui"
+    },
+    {
+     "debut": 141.376,
+     "fin": 141.666,
+     "texte": "revient"
+    },
+    {
+     "debut": 141.666,
+     "fin": 141.921,
+     "texte": "chaque"
+    },
+    {
+     "debut": 141.921,
+     "fin": 142.109,
+     "texte": "nuit."
+    }
+   ]
+  },
+  {
+   "debut": 142.628,
+   "fin": 147.46,
+   "texte": "Ce verset ne te promet pas que la vallée va disparaître",
+   "mots": [
+    {
+     "debut": 142.678,
+     "fin": 142.953,
+     "texte": "Ce"
+    },
+    {
+     "debut": 142.953,
+     "fin": 143.542,
+     "texte": "verset"
+    },
+    {
+     "debut": 143.542,
+     "fin": 143.817,
+     "texte": "ne"
+    },
+    {
+     "debut": 143.817,
+     "fin": 144.092,
+     "texte": "te"
+    },
+    {
+     "debut": 144.092,
+     "fin": 144.681,
+     "texte": "promet"
+    },
+    {
+     "debut": 144.681,
+     "fin": 145.035,
+     "texte": "pas"
+    },
+    {
+     "debut": 145.035,
+     "fin": 145.389,
+     "texte": "que"
+    },
+    {
+     "debut": 145.389,
+     "fin": 145.663,
+     "texte": "la"
+    },
+    {
+     "debut": 145.663,
+     "fin": 146.253,
+     "texte": "vallée"
+    },
+    {
+     "debut": 146.253,
+     "fin": 146.528,
+     "texte": "va"
+    },
+    {
+     "debut": 146.528,
+     "fin": 147.51,
+     "texte": "disparaître"
+    }
+   ]
+  },
+  {
+   "debut": 147.46,
+   "fin": 151.291,
+   "texte": "demain. Il te promet que tu ne la traverses pas seul.",
+   "mots": [
+    {
+     "debut": 147.51,
+     "fin": 148.099,
+     "texte": "demain."
+    },
+    {
+     "debut": 148.677,
+     "fin": 148.802,
+     "texte": "Il"
+    },
+    {
+     "debut": 148.802,
+     "fin": 148.926,
+     "texte": "te"
+    },
+    {
+     "debut": 148.926,
+     "fin": 149.194,
+     "texte": "promet"
+    },
+    {
+     "debut": 149.194,
+     "fin": 149.355,
+     "texte": "que"
+    },
+    {
+     "debut": 149.355,
+     "fin": 149.48,
+     "texte": "tu"
+    },
+    {
+     "debut": 149.48,
+     "fin": 149.605,
+     "texte": "ne"
+    },
+    {
+     "debut": 149.605,
+     "fin": 149.73,
+     "texte": "la"
+    },
+    {
+     "debut": 149.73,
+     "fin": 150.105,
+     "texte": "traverses"
+    },
+    {
+     "debut": 150.105,
+     "fin": 150.266,
+     "texte": "pas"
+    },
+    {
+     "debut": 150.266,
+     "fin": 150.462,
+     "texte": "seul."
+    }
+   ]
+  },
+  {
+   "debut": 151.291,
+   "fin": 154.908,
+   "texte": "Jésus a repris cette image : « Je suis le bon berger.",
+   "mots": [
+    {
+     "debut": 151.341,
+     "fin": 151.729,
+     "texte": "Jésus"
+    },
+    {
+     "debut": 151.729,
+     "fin": 151.878,
+     "texte": "a"
+    },
+    {
+     "debut": 151.878,
+     "fin": 152.326,
+     "texte": "repris"
+    },
+    {
+     "debut": 152.326,
+     "fin": 152.714,
+     "texte": "cette"
+    },
+    {
+     "debut": 152.714,
+     "fin": 153.102,
+     "texte": "image :"
+    },
+    {
+     "debut": 153.209,
+     "fin": 153.418,
+     "texte": "« Je"
+    },
+    {
+     "debut": 153.418,
+     "fin": 153.746,
+     "texte": "suis"
+    },
+    {
+     "debut": 153.746,
+     "fin": 153.955,
+     "texte": "le"
+    },
+    {
+     "debut": 153.955,
+     "fin": 154.223,
+     "texte": "bon"
+    },
+    {
+     "debut": 154.223,
+     "fin": 154.671,
+     "texte": "berger."
+    }
+   ]
+  },
+  {
+   "debut": 154.908,
+   "fin": 159.033,
+   "texte": "Le bon berger donne sa vie pour ses brebis. »",
+   "mots": [
+    {
+     "debut": 154.958,
+     "fin": 155.211,
+     "texte": "Le"
+    },
+    {
+     "debut": 155.211,
+     "fin": 155.536,
+     "texte": "bon"
+    },
+    {
+     "debut": 155.536,
+     "fin": 156.078,
+     "texte": "berger"
+    },
+    {
+     "debut": 156.078,
+     "fin": 156.548,
+     "texte": "donne"
+    },
+    {
+     "debut": 156.548,
+     "fin": 156.801,
+     "texte": "sa"
+    },
+    {
+     "debut": 156.801,
+     "fin": 157.126,
+     "texte": "vie"
+    },
+    {
+     "debut": 157.126,
+     "fin": 157.524,
+     "texte": "pour"
+    },
+    {
+     "debut": 157.524,
+     "fin": 157.849,
+     "texte": "ses"
+    },
+    {
+     "debut": 157.849,
+     "fin": 158.391,
+     "texte": "brebis. »"
+    }
+   ]
+  },
+  {
+   "debut": 159.033,
+   "fin": 164.953,
+   "texte": "Le berger ne regarde pas la vallée de loin. Il y marche avec toi.",
+   "mots": [
+    {
+     "debut": 159.083,
+     "fin": 159.309,
+     "texte": "Le"
+    },
+    {
+     "debut": 159.309,
+     "fin": 159.794,
+     "texte": "berger"
+    },
+    {
+     "debut": 159.794,
+     "fin": 160.021,
+     "texte": "ne"
+    },
+    {
+     "debut": 160.021,
+     "fin": 160.571,
+     "texte": "regarde"
+    },
+    {
+     "debut": 160.571,
+     "fin": 160.862,
+     "texte": "pas"
+    },
+    {
+     "debut": 160.862,
+     "fin": 161.088,
+     "texte": "la"
+    },
+    {
+     "debut": 161.088,
+     "fin": 161.573,
+     "texte": "vallée"
+    },
+    {
+     "debut": 161.573,
+     "fin": 161.8,
+     "texte": "de"
+    },
+    {
+     "debut": 161.8,
+     "fin": 162.155,
+     "texte": "loin."
+    },
+    {
+     "debut": 162.421,
+     "fin": 162.623,
+     "texte": "Il"
+    },
+    {
+     "debut": 162.623,
+     "fin": 162.767,
+     "texte": "y"
+    },
+    {
+     "debut": 162.767,
+     "fin": 163.2,
+     "texte": "marche"
+    },
+    {
+     "debut": 163.2,
+     "fin": 163.517,
+     "texte": "avec"
+    },
+    {
+     "debut": 163.517,
+     "fin": 163.776,
+     "texte": "toi."
+    }
+   ]
+  },
+  {
+   "debut": 164.953,
+   "fin": 168.293,
+   "texte": "Si ce verset t'a fait du bien, abonne-toi : chaque jour,",
+   "mots": [
+    {
+     "debut": 165.003,
+     "fin": 165.193,
+     "texte": "Si"
+    },
+    {
+     "debut": 165.193,
+     "fin": 165.384,
+     "texte": "ce"
+    },
+    {
+     "debut": 165.384,
+     "fin": 165.792,
+     "texte": "verset"
+    },
+    {
+     "debut": 165.792,
+     "fin": 165.982,
+     "texte": "t'a"
+    },
+    {
+     "debut": 165.982,
+     "fin": 166.282,
+     "texte": "fait"
+    },
+    {
+     "debut": 166.282,
+     "fin": 166.472,
+     "texte": "du"
+    },
+    {
+     "debut": 166.472,
+     "fin": 166.772,
+     "texte": "bien,"
+    },
+    {
+     "debut": 166.869,
+     "fin": 167.441,
+     "texte": "abonne-toi :"
+    },
+    {
+     "debut": 167.538,
+     "fin": 167.946,
+     "texte": "chaque"
+    },
+    {
+     "debut": 167.946,
+     "fin": 168.246,
+     "texte": "jour,"
+    }
+   ]
+  },
+  {
+   "debut": 168.293,
+   "fin": 170.728,
+   "texte": "un verset, expliqué simplement.",
+   "mots": [
+    {
+     "debut": 168.343,
+     "fin": 168.534,
+     "texte": "un"
+    },
+    {
+     "debut": 168.534,
+     "fin": 168.942,
+     "texte": "verset,"
+    },
+    {
+     "debut": 169.04,
+     "fin": 169.557,
+     "texte": "expliqué"
+    },
+    {
+     "debut": 169.557,
+     "fin": 170.183,
+     "texte": "simplement."
+    }
+   ]
+  },
+  {
+   "debut": 170.728,
+   "fin": 174.114,
+   "texte": "Et écris en commentaire : « Tu es avec moi. »",
+   "mots": [
+    {
+     "debut": 170.778,
+     "fin": 171.0,
+     "texte": "Et"
+    },
+    {
+     "debut": 171.0,
+     "fin": 171.411,
+     "texte": "écris"
+    },
+    {
+     "debut": 171.411,
+     "fin": 171.633,
+     "texte": "en"
+    },
+    {
+     "debut": 171.633,
+     "fin": 172.424,
+     "texte": "commentaire :"
+    },
+    {
+     "debut": 172.538,
+     "fin": 172.759,
+     "texte": "« Tu"
+    },
+    {
+     "debut": 172.759,
+     "fin": 172.981,
+     "texte": "es"
+    },
+    {
+     "debut": 172.981,
+     "fin": 173.329,
+     "texte": "avec"
+    },
+    {
+     "debut": 173.329,
+     "fin": 173.614,
+     "texte": "moi. »"
+    }
+   ]
+  },
+  {
+   "debut": 174.859,
+   "fin": 177.163,
+   "texte": "Maintenant… prions ensemble.",
+   "mots": [
+    {
+     "debut": 174.909,
+     "fin": 175.795,
+     "texte": "Maintenant…"
+    },
+    {
+     "debut": 176.093,
+     "fin": 176.344,
+     "texte": "prions"
+    },
+    {
+     "debut": 176.344,
+     "fin": 176.663,
+     "texte": "ensemble."
+    }
+   ]
+  },
+  {
+   "debut": 178.344,
+   "fin": 181.378,
+   "texte": "Seigneur… ce soir, je te donne ce qui m'inquiète.",
+   "mots": [
+    {
+     "debut": 178.394,
+     "fin": 179.229,
+     "texte": "Seigneur…"
+    },
+    {
+     "debut": 179.494,
+     "fin": 179.605,
+     "texte": "ce"
+    },
+    {
+     "debut": 179.605,
+     "fin": 179.779,
+     "texte": "soir,"
+    },
+    {
+     "debut": 179.826,
+     "fin": 179.937,
+     "texte": "je"
+    },
+    {
+     "debut": 179.937,
+     "fin": 180.048,
+     "texte": "te"
+    },
+    {
+     "debut": 180.048,
+     "fin": 180.254,
+     "texte": "donne"
+    },
+    {
+     "debut": 180.254,
+     "fin": 180.366,
+     "texte": "ce"
+    },
+    {
+     "debut": 180.366,
+     "fin": 180.508,
+     "texte": "qui"
+    },
+    {
+     "debut": 180.508,
+     "fin": 180.842,
+     "texte": "m'inquiète."
+    }
+   ]
+  },
+  {
+   "debut": 181.378,
+   "fin": 186.192,
+   "texte": "Tu connais ma vallée mieux que moi.",
+   "mots": [
+    {
+     "debut": 181.428,
+     "fin": 181.812,
+     "texte": "Tu"
+    },
+    {
+     "debut": 181.812,
+     "fin": 182.744,
+     "texte": "connais"
+    },
+    {
+     "debut": 182.744,
+     "fin": 183.127,
+     "texte": "ma"
+    },
+    {
+     "debut": 183.127,
+     "fin": 183.95,
+     "texte": "vallée"
+    },
+    {
+     "debut": 183.95,
+     "fin": 184.662,
+     "texte": "mieux"
+    },
+    {
+     "debut": 184.662,
+     "fin": 185.155,
+     "texte": "que"
+    },
+    {
+     "debut": 185.155,
+     "fin": 185.649,
+     "texte": "moi."
+    }
+   ]
+  },
+  {
+   "debut": 186.192,
+   "fin": 187.819,
+   "texte": "Je ne te demande pas de tout comprendre.",
+   "mots": [
+    {
+     "debut": 186.242,
+     "fin": 186.359,
+     "texte": "Je"
+    },
+    {
+     "debut": 186.359,
+     "fin": 186.476,
+     "texte": "ne"
+    },
+    {
+     "debut": 186.476,
+     "fin": 186.593,
+     "texte": "te"
+    },
+    {
+     "debut": 186.593,
+     "fin": 186.878,
+     "texte": "demande"
+    },
+    {
+     "debut": 186.878,
+     "fin": 187.028,
+     "texte": "pas"
+    },
+    {
+     "debut": 187.028,
+     "fin": 187.145,
+     "texte": "de"
+    },
+    {
+     "debut": 187.145,
+     "fin": 187.329,
+     "texte": "tout"
+    },
+    {
+     "debut": 187.329,
+     "fin": 187.714,
+     "texte": "comprendre."
+    }
+   ]
+  },
+  {
+   "debut": 187.819,
+   "fin": 190.82,
+   "texte": "Je te demande de rester avec moi.",
+   "mots": [
+    {
+     "debut": 187.869,
+     "fin": 188.057,
+     "texte": "Je"
+    },
+    {
+     "debut": 188.057,
+     "fin": 188.245,
+     "texte": "te"
+    },
+    {
+     "debut": 188.245,
+     "fin": 188.701,
+     "texte": "demande"
+    },
+    {
+     "debut": 188.701,
+     "fin": 188.889,
+     "texte": "de"
+    },
+    {
+     "debut": 188.889,
+     "fin": 189.291,
+     "texte": "rester"
+    },
+    {
+     "debut": 189.291,
+     "fin": 189.586,
+     "texte": "avec"
+    },
+    {
+     "debut": 189.586,
+     "fin": 189.828,
+     "texte": "moi."
+    }
+   ]
+  },
+  {
+   "debut": 190.82,
+   "fin": 193.505,
+   "texte": "Sois mon berger cette nuit.",
+   "mots": [
+    {
+     "debut": 190.87,
+     "fin": 191.333,
+     "texte": "Sois"
+    },
+    {
+     "debut": 191.333,
+     "fin": 191.712,
+     "texte": "mon"
+    },
+    {
+     "debut": 191.712,
+     "fin": 192.343,
+     "texte": "berger"
+    },
+    {
+     "debut": 192.343,
+     "fin": 192.89,
+     "texte": "cette"
+    },
+    {
+     "debut": 192.89,
+     "fin": 193.353,
+     "texte": "nuit."
+    }
+   ]
+  },
+  {
+   "debut": 193.505,
+   "fin": 197.685,
+   "texte": "Garde mon cœur… et garde ceux que j'aime.",
+   "mots": [
+    {
+     "debut": 193.555,
+     "fin": 193.744,
+     "texte": "Garde"
+    },
+    {
+     "debut": 193.744,
+     "fin": 193.875,
+     "texte": "mon"
+    },
+    {
+     "debut": 193.875,
+     "fin": 194.034,
+     "texte": "cœur…"
+    },
+    {
+     "debut": 194.332,
+     "fin": 194.702,
+     "texte": "et"
+    },
+    {
+     "debut": 194.702,
+     "fin": 195.389,
+     "texte": "garde"
+    },
+    {
+     "debut": 195.389,
+     "fin": 195.971,
+     "texte": "ceux"
+    },
+    {
+     "debut": 195.971,
+     "fin": 196.447,
+     "texte": "que"
+    },
+    {
+     "debut": 196.447,
+     "fin": 197.135,
+     "texte": "j'aime."
+    }
+   ]
+  },
+  {
+   "debut": 197.685,
+   "fin": 200.902,
+   "texte": "Donne-moi de dormir en paix, parce que tu es là.",
+   "mots": [
+    {
+     "debut": 197.735,
+     "fin": 198.104,
+     "texte": "Donne-moi"
+    },
+    {
+     "debut": 198.104,
+     "fin": 198.24,
+     "texte": "de"
+    },
+    {
+     "debut": 198.24,
+     "fin": 198.532,
+     "texte": "dormir"
+    },
+    {
+     "debut": 198.532,
+     "fin": 198.668,
+     "texte": "en"
+    },
+    {
+     "debut": 198.668,
+     "fin": 198.882,
+     "texte": "paix,"
+    },
+    {
+     "debut": 198.939,
+     "fin": 199.191,
+     "texte": "parce"
+    },
+    {
+     "debut": 199.191,
+     "fin": 199.366,
+     "texte": "que"
+    },
+    {
+     "debut": 199.366,
+     "fin": 199.502,
+     "texte": "tu"
+    },
+    {
+     "debut": 199.502,
+     "fin": 199.639,
+     "texte": "es"
+    },
+    {
+     "debut": 199.639,
+     "fin": 199.775,
+     "texte": "là."
+    }
+   ]
+  },
+  {
+   "debut": 200.902,
+   "fin": 204.474,
+   "texte": "Au nom de Jésus… amen.",
+   "mots": [
+    {
+     "debut": 200.952,
+     "fin": 201.361,
+     "texte": "Au"
+    },
+    {
+     "debut": 201.361,
+     "fin": 201.887,
+     "texte": "nom"
+    },
+    {
+     "debut": 201.887,
+     "fin": 202.296,
+     "texte": "de"
+    },
+    {
+     "debut": 202.296,
+     "fin": 203.056,
+     "texte": "Jésus…"
+    },
+    {
+     "debut": 203.502,
+     "fin": 203.974,
+     "texte": "amen."
+    }
+   ]
+  },
+  {
+   "debut": 205.369,
+   "fin": 208.929,
+   "texte": "Dors en paix. On se retrouve demain pour un nouveau verset.",
+   "mots": [
+    {
+     "debut": 205.419,
+     "fin": 205.731,
+     "texte": "Dors"
+    },
+    {
+     "debut": 205.731,
+     "fin": 205.93,
+     "texte": "en"
+    },
+    {
+     "debut": 205.93,
+     "fin": 206.242,
+     "texte": "paix."
+    },
+    {
+     "debut": 206.715,
+     "fin": 206.843,
+     "texte": "On"
+    },
+    {
+     "debut": 206.843,
+     "fin": 206.972,
+     "texte": "se"
+    },
+    {
+     "debut": 206.972,
+     "fin": 207.32,
+     "texte": "retrouve"
+    },
+    {
+     "debut": 207.32,
+     "fin": 207.596,
+     "texte": "demain"
+    },
+    {
+     "debut": 207.596,
+     "fin": 207.798,
+     "texte": "pour"
+    },
+    {
+     "debut": 207.798,
+     "fin": 207.926,
+     "texte": "un"
+    },
+    {
+     "debut": 207.926,
+     "fin": 208.238,
+     "texte": "nouveau"
+    },
+    {
+     "debut": 208.238,
+     "fin": 208.513,
+     "texte": "verset."
+    }
+   ]
+  },
+  {
+   "debut": 208.929,
+   "fin": 213.099,
+   "texte": "Et si tu veux aller plus loin… la vidéo à l'écran est pour toi.",
+   "mots": [
+    {
+     "debut": 208.979,
+     "fin": 209.173,
+     "texte": "Et"
+    },
+    {
+     "debut": 209.173,
+     "fin": 209.367,
+     "texte": "si"
+    },
+    {
+     "debut": 209.367,
+     "fin": 209.561,
+     "texte": "tu"
+    },
+    {
+     "debut": 209.561,
+     "fin": 209.866,
+     "texte": "veux"
+    },
+    {
+     "debut": 209.866,
+     "fin": 210.226,
+     "texte": "aller"
+    },
+    {
+     "debut": 210.226,
+     "fin": 210.53,
+     "texte": "plus"
+    },
+    {
+     "debut": 210.53,
+     "fin": 210.835,
+     "texte": "loin…"
+    },
+    {
+     "debut": 211.101,
+     "fin": 211.253,
+     "texte": "la"
+    },
+    {
+     "debut": 211.253,
+     "fin": 211.535,
+     "texte": "vidéo"
+    },
+    {
+     "debut": 211.535,
+     "fin": 211.644,
+     "texte": "à"
+    },
+    {
+     "debut": 211.644,
+     "fin": 211.969,
+     "texte": "l'écran"
+    },
+    {
+     "debut": 211.969,
+     "fin": 212.165,
+     "texte": "est"
+    },
+    {
+     "debut": 212.165,
+     "fin": 212.404,
+     "texte": "pour"
+    },
+    {
+     "debut": 212.404,
+     "fin": 212.599,
+     "texte": "toi."
+    }
+   ]
+  }
+ ]
+}

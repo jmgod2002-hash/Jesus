@@ -157,7 +157,11 @@ window.seek = function (t) {
   sousTitres(t, s); carteVerset(s, t); cartes(t); chapitre(s, t); appel(s, t); habillage(s, t); noir(s, t);
 };
 
+// ?fond=1 : seulement le décor et le personnage (pour remonter les textes dans un logiciel de montage)
+const FOND = /[?&]fond=1/.test(location.search);
 window.ready = document.fonts.ready.then(() => {
+  if (FOND) for (const id of ['st', 'cv', 'voile', 'carte', 'cta', 'com', 'chap', 'acc', 'puce', 'barre', 'fin', 'marque', 'haut'])
+    if ($(id)) $(id).style.display = 'none';
   setupDecors();
   if (!C.piste.syl) C.piste.syl = [];
   window.seek(0.5);

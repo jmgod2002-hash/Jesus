@@ -1,0 +1,686 @@
+{
+ "format": "short_tiktok",
+ "largeur": 1080,
+ "hauteur": 1920,
+ "fps": 30,
+ "duree": 42.55,
+ "unite": "secondes depuis le début de la vidéo finale",
+ "pistes": {
+  "video_sans_texte": "fond.mp4",
+  "voix": "voix.m4a",
+  "musique": "musique.m4a (déjà baissée sous la voix)",
+  "intro_son": null,
+  "sous_titres": "sous_titres.srt",
+  "video_complete": "../../rendu/psaume-23-4_tiktok.mp4"
+ },
+ "intro": null,
+ "blocs": [
+  {
+   "id": "s1_accroche",
+   "debut": 0.0,
+   "fin": 3.69,
+   "decor": "chambre",
+   "plan": "serre",
+   "chapitre": null
+  },
+  {
+   "id": "s2_verset",
+   "debut": 3.69,
+   "fin": 13.752,
+   "decor": "chambre",
+   "plan": "large",
+   "chapitre": null
+  },
+  {
+   "id": "s3_contexte",
+   "debut": 13.752,
+   "fin": 28.268,
+   "decor": "sommet",
+   "plan": "large",
+   "chapitre": null
+  },
+  {
+   "id": "s4_pour_toi",
+   "debut": 28.268,
+   "fin": 34.976,
+   "decor": "chambre",
+   "plan": "serre",
+   "chapitre": null
+  },
+  {
+   "id": "s5_cta_tiktok",
+   "debut": 34.976,
+   "fin": 42.55,
+   "decor": "chambre",
+   "plan": "serre",
+   "chapitre": null
+  }
+ ],
+ "voix": [
+  {
+   "bloc": "s1_accroche",
+   "debut": 0.0,
+   "fichier_original": "voix/s1_accroche.mp3"
+  },
+  {
+   "bloc": "s2_verset",
+   "debut": 3.69,
+   "fichier_original": "voix/s2_verset.mp3"
+  },
+  {
+   "bloc": "s3_contexte",
+   "debut": 13.752,
+   "fichier_original": "voix/s3_contexte.mp3"
+  },
+  {
+   "bloc": "s4_pour_toi",
+   "debut": 28.268,
+   "fichier_original": "voix/s4_pour_toi.mp3"
+  },
+  {
+   "bloc": "s5_cta_tiktok",
+   "debut": 34.976,
+   "fichier_original": "voix/s5_cta_tiktok.mp3"
+  }
+ ],
+ "textes_a_l_ecran": [
+  {
+   "type": "accroche",
+   "debut": 0.0,
+   "fin": 3.69,
+   "texte": "SI TU AS PEUR CE SOIR…"
+  },
+  {
+   "type": "verset",
+   "debut": 3.69,
+   "fin": 13.752,
+   "reference": "Psaume 23:4",
+   "traduction": "Louis Segond 1910",
+   "texte": "Quand je marche dans la vallée de l'ombre de la mort, je ne crains aucun mal, car tu es avec moi.",
+   "mots": [
+    {
+     "t": 3.88,
+     "texte": "Quand"
+    },
+    {
+     "t": 4.299,
+     "texte": "je"
+    },
+    {
+     "t": 4.525,
+     "texte": "marche"
+    },
+    {
+     "t": 5.009,
+     "texte": "dans"
+    },
+    {
+     "t": 5.364,
+     "texte": "la"
+    },
+    {
+     "t": 5.59,
+     "texte": "vallée"
+    },
+    {
+     "t": 6.074,
+     "texte": "de"
+    },
+    {
+     "t": 6.299,
+     "texte": "l'ombre"
+    },
+    {
+     "t": 6.783,
+     "texte": "de"
+    },
+    {
+     "t": 7.009,
+     "texte": "la"
+    },
+    {
+     "t": 7.235,
+     "texte": "mort,"
+    },
+    {
+     "t": 7.874,
+     "texte": "je"
+    },
+    {
+     "t": 8.1,
+     "texte": "ne"
+    },
+    {
+     "t": 8.326,
+     "texte": "crains"
+    },
+    {
+     "t": 8.81,
+     "texte": "aucun"
+    },
+    {
+     "t": 9.229,
+     "texte": "mal,"
+    },
+    {
+     "t": 9.615,
+     "texte": "car"
+    },
+    {
+     "t": 9.905,
+     "texte": "tu"
+    },
+    {
+     "t": 10.131,
+     "texte": "es"
+    },
+    {
+     "t": 10.357,
+     "texte": "avec"
+    },
+    {
+     "t": 10.712,
+     "texte": "moi."
+    }
+   ]
+  },
+  {
+   "type": "reference",
+   "debut": 3.69,
+   "fin": 42.55,
+   "texte": "PSAUME 23 · 4"
+  },
+  {
+   "type": "abonnement",
+   "debut": 35.176,
+   "fin": 42.45,
+   "plateforme": "tiktok",
+   "texte": "Un verset par jour",
+   "clic": 36.676
+  },
+  {
+   "type": "commentaire",
+   "debut": 38.157,
+   "fin": 42.45,
+   "texte": "Écris en commentaire : « Tu es avec moi »"
+  }
+ ],
+ "sous_titres": [
+  {
+   "debut": 0.25,
+   "fin": 2.89,
+   "texte": "Si tu as peur ce soir… écoute ça.",
+   "mots": [
+    {
+     "debut": 0.3,
+     "fin": 0.488,
+     "texte": "Si"
+    },
+    {
+     "debut": 0.488,
+     "fin": 0.677,
+     "texte": "tu"
+    },
+    {
+     "debut": 0.677,
+     "fin": 0.865,
+     "texte": "as"
+    },
+    {
+     "debut": 0.865,
+     "fin": 1.161,
+     "texte": "peur"
+    },
+    {
+     "debut": 1.161,
+     "fin": 1.349,
+     "texte": "ce"
+    },
+    {
+     "debut": 1.349,
+     "fin": 1.645,
+     "texte": "soir…"
+    },
+    {
+     "debut": 1.908,
+     "fin": 2.237,
+     "texte": "écoute"
+    },
+    {
+     "debut": 2.237,
+     "fin": 2.39,
+     "texte": "ça."
+    }
+   ]
+  },
+  {
+   "debut": 13.842,
+   "fin": 15.976,
+   "texte": "David était berger. La vallée,",
+   "mots": [
+    {
+     "debut": 13.892,
+     "fin": 14.307,
+     "texte": "David"
+    },
+    {
+     "debut": 14.307,
+     "fin": 14.723,
+     "texte": "était"
+    },
+    {
+     "debut": 14.723,
+     "fin": 15.203,
+     "texte": "berger."
+    },
+    {
+     "debut": 15.441,
+     "fin": 15.601,
+     "texte": "La"
+    },
+    {
+     "debut": 15.601,
+     "fin": 15.944,
+     "texte": "vallée,"
+    }
+   ]
+  },
+  {
+   "debut": 15.976,
+   "fin": 17.781,
+   "texte": "c'était un ravin sombre où les bêtes",
+   "mots": [
+    {
+     "debut": 16.026,
+     "fin": 16.369,
+     "texte": "c'était"
+    },
+    {
+     "debut": 16.369,
+     "fin": 16.529,
+     "texte": "un"
+    },
+    {
+     "debut": 16.529,
+     "fin": 16.826,
+     "texte": "ravin"
+    },
+    {
+     "debut": 16.826,
+     "fin": 17.168,
+     "texte": "sombre"
+    },
+    {
+     "debut": 17.168,
+     "fin": 17.328,
+     "texte": "où"
+    },
+    {
+     "debut": 17.328,
+     "fin": 17.534,
+     "texte": "les"
+    },
+    {
+     "debut": 17.534,
+     "fin": 17.831,
+     "texte": "bêtes"
+    }
+   ]
+  },
+  {
+   "debut": 17.781,
+   "fin": 19.936,
+   "texte": "sauvages attendaient le troupeau.",
+   "mots": [
+    {
+     "debut": 17.831,
+     "fin": 18.265,
+     "texte": "sauvages"
+    },
+    {
+     "debut": 18.265,
+     "fin": 18.837,
+     "texte": "attendaient"
+    },
+    {
+     "debut": 18.837,
+     "fin": 18.997,
+     "texte": "le"
+    },
+    {
+     "debut": 18.997,
+     "fin": 19.431,
+     "texte": "troupeau."
+    }
+   ]
+  },
+  {
+   "debut": 19.936,
+   "fin": 22.027,
+   "texte": "Et c'est là, au pire moment,",
+   "mots": [
+    {
+     "debut": 19.986,
+     "fin": 20.211,
+     "texte": "Et"
+    },
+    {
+     "debut": 20.211,
+     "fin": 20.564,
+     "texte": "c'est"
+    },
+    {
+     "debut": 20.564,
+     "fin": 20.788,
+     "texte": "là,"
+    },
+    {
+     "debut": 20.903,
+     "fin": 21.128,
+     "texte": "au"
+    },
+    {
+     "debut": 21.128,
+     "fin": 21.481,
+     "texte": "pire"
+    },
+    {
+     "debut": 21.481,
+     "fin": 21.962,
+     "texte": "moment,"
+    }
+   ]
+  },
+  {
+   "debut": 22.027,
+   "fin": 24.496,
+   "texte": "qu'il arrête de parler DE Dieu…",
+   "mots": [
+    {
+     "debut": 22.077,
+     "fin": 22.43,
+     "texte": "qu'il"
+    },
+    {
+     "debut": 22.43,
+     "fin": 22.911,
+     "texte": "arrête"
+    },
+    {
+     "debut": 22.911,
+     "fin": 23.136,
+     "texte": "de"
+    },
+    {
+     "debut": 23.136,
+     "fin": 23.617,
+     "texte": "parler"
+    },
+    {
+     "debut": 23.617,
+     "fin": 23.841,
+     "texte": "DE"
+    },
+    {
+     "debut": 23.841,
+     "fin": 24.194,
+     "texte": "Dieu…"
+    }
+   ]
+  },
+  {
+   "debut": 24.496,
+   "fin": 27.692,
+   "texte": "pour parler À Dieu : « TU es avec moi. »",
+   "mots": [
+    {
+     "debut": 24.546,
+     "fin": 24.911,
+     "texte": "pour"
+    },
+    {
+     "debut": 24.911,
+     "fin": 25.41,
+     "texte": "parler"
+    },
+    {
+     "debut": 25.41,
+     "fin": 25.576,
+     "texte": "À"
+    },
+    {
+     "debut": 25.576,
+     "fin": 25.942,
+     "texte": "Dieu :"
+    },
+    {
+     "debut": 26.061,
+     "fin": 26.294,
+     "texte": "« TU"
+    },
+    {
+     "debut": 26.294,
+     "fin": 26.527,
+     "texte": "es"
+    },
+    {
+     "debut": 26.527,
+     "fin": 26.892,
+     "texte": "avec"
+    },
+    {
+     "debut": 26.892,
+     "fin": 27.192,
+     "texte": "moi. »"
+    }
+   ]
+  },
+  {
+   "debut": 28.488,
+   "fin": 30.187,
+   "texte": "Le danger est toujours là.",
+   "mots": [
+    {
+     "debut": 28.538,
+     "fin": 28.72,
+     "texte": "Le"
+    },
+    {
+     "debut": 28.72,
+     "fin": 29.11,
+     "texte": "danger"
+    },
+    {
+     "debut": 29.11,
+     "fin": 29.344,
+     "texte": "est"
+    },
+    {
+     "debut": 29.344,
+     "fin": 29.838,
+     "texte": "toujours"
+    },
+    {
+     "debut": 29.838,
+     "fin": 30.019,
+     "texte": "là."
+    }
+   ]
+  },
+  {
+   "debut": 30.187,
+   "fin": 32.182,
+   "texte": "Mais tu n'es pas seul dedans.",
+   "mots": [
+    {
+     "debut": 30.237,
+     "fin": 30.502,
+     "texte": "Mais"
+    },
+    {
+     "debut": 30.502,
+     "fin": 30.67,
+     "texte": "tu"
+    },
+    {
+     "debut": 30.67,
+     "fin": 30.887,
+     "texte": "n'es"
+    },
+    {
+     "debut": 30.887,
+     "fin": 31.104,
+     "texte": "pas"
+    },
+    {
+     "debut": 31.104,
+     "fin": 31.368,
+     "texte": "seul"
+    },
+    {
+     "debut": 31.368,
+     "fin": 31.729,
+     "texte": "dedans."
+    }
+   ]
+  },
+  {
+   "debut": 32.182,
+   "fin": 35.046,
+   "texte": "La peur n'a pas le dernier mot.",
+   "mots": [
+    {
+     "debut": 32.232,
+     "fin": 32.411,
+     "texte": "La"
+    },
+    {
+     "debut": 32.411,
+     "fin": 32.693,
+     "texte": "peur"
+    },
+    {
+     "debut": 32.693,
+     "fin": 32.872,
+     "texte": "n'a"
+    },
+    {
+     "debut": 32.872,
+     "fin": 33.102,
+     "texte": "pas"
+    },
+    {
+     "debut": 33.102,
+     "fin": 33.282,
+     "texte": "le"
+    },
+    {
+     "debut": 33.282,
+     "fin": 33.717,
+     "texte": "dernier"
+    },
+    {
+     "debut": 33.717,
+     "fin": 33.948,
+     "texte": "mot."
+    }
+   ]
+  },
+  {
+   "debut": 35.046,
+   "fin": 36.337,
+   "texte": "Un verset par jour,",
+   "mots": [
+    {
+     "debut": 35.096,
+     "fin": 35.294,
+     "texte": "Un"
+    },
+    {
+     "debut": 35.294,
+     "fin": 35.719,
+     "texte": "verset"
+    },
+    {
+     "debut": 35.719,
+     "fin": 35.974,
+     "texte": "par"
+    },
+    {
+     "debut": 35.974,
+     "fin": 36.286,
+     "texte": "jour,"
+    }
+   ]
+  },
+  {
+   "debut": 36.337,
+   "fin": 39.011,
+   "texte": "expliqué simplement. Suis-nous…",
+   "mots": [
+    {
+     "debut": 36.387,
+     "fin": 36.926,
+     "texte": "expliqué"
+    },
+    {
+     "debut": 36.926,
+     "fin": 37.578,
+     "texte": "simplement."
+    },
+    {
+     "debut": 37.832,
+     "fin": 38.405,
+     "texte": "Suis-nous…"
+    }
+   ]
+  },
+  {
+   "debut": 39.011,
+   "fin": 42.036,
+   "texte": "et écris « Tu es avec moi » en commentaire.",
+   "mots": [
+    {
+     "debut": 39.061,
+     "fin": 39.263,
+     "texte": "et"
+    },
+    {
+     "debut": 39.263,
+     "fin": 39.637,
+     "texte": "écris"
+    },
+    {
+     "debut": 39.637,
+     "fin": 39.838,
+     "texte": "« Tu"
+    },
+    {
+     "debut": 39.838,
+     "fin": 40.04,
+     "texte": "es"
+    },
+    {
+     "debut": 40.04,
+     "fin": 40.356,
+     "texte": "avec"
+    },
+    {
+     "debut": 40.356,
+     "fin": 40.615,
+     "texte": "moi »"
+    },
+    {
+     "debut": 40.615,
+     "fin": 40.817,
+     "texte": "en"
+    },
+    {
+     "debut": 40.817,
+     "fin": 41.536,
+     "texte": "commentaire."
+    }
+   ]
+  }
+ ]
+}

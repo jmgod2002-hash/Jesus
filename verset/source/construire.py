@@ -459,6 +459,54 @@ def script_md(ep):
     return "\n".join(L)
 
 
+# ---------------------------------------------------------------- kit de montage (MK Cut, CapCut, Premiere…)
+def tc_srt(t):
+    ms = int(round(t * 1000)); h, ms = divmod(ms, 3600000); m, ms = divmod(ms, 60000); s_, ms = divmod(ms, 1000)
+    return f"{h:02d}:{m:02d}:{s_:02d},{ms:03d}"
+
+def kit_montage(ep, ep_dir, fmt, tl):
+    """montage/<format>/ : sous_titres.srt + timeline.json (blocs, textes à l'écran, pistes). Les pistes elles-mêmes
+    (fond.mp4 sans texte, voix.m4a, musique.m4a, intro.m4a) sont produites par render.js --fond / --pistes."""
+    d = os.path.join(ep_dir, "montage", fmt); os.makedirs(d, exist_ok=True)
+    srt = "".join(f"{i}\n{tc_srt(g['t0'])} --> {tc_srt(g['t1'])}\n{' '.join(m['txt'] for m in g['mots'])}\n\n" for i, g in enumerate(tl["soustitres"], 1))
+    open(os.path.join(d, "sous_titres.srt"), "w").write(srt)
+    r = lambda x: round(x, 3)
+    textes = []
+    for s_ in tl["segments"]:
+        if s_.get("carte_verset"):
+            textes.append(dict(type="verset", debut=r(s_["t0"]), fin=r(s_["t1"]), reference=ep["reference"], traduction=ep["traduction"],
+                               texte=ep["verset"] if s_["carte_verset"] == "long" else ep["verset_court"], mots=[dict(t=r(m["t0"]), texte=m["txt"]) for m in s_["mots"]]))
+        if s_.get("chapitre"):
+            textes.append(dict(type="chapitre", debut=r(s_["t0"] + 0.3), fin=r(s_["t0"] + 4.0), numero=s_["chapitre_n"], total=s_["chapitres"], titre=s_["chapitre"]))
+        if s_.get("cta"):
+            textes.append(dict(type="abonnement", debut=r(s_["t0"] + 0.2), fin=r(s_["t1"] - 0.1), plateforme=s_["cta"], texte="Un verset par jour", clic=r(s_["t0"] + 1.7)))
+        if s_.get("commentaire"):
+            textes.append(dict(type="commentaire", debut=r(s_["t0"] + 0.42 * (s_["t1"] - s_["t0"])), fin=r(s_["t1"] - 0.1), texte=f"Écris en commentaire : « {s_['commentaire']} »"))
+        if s_.get("fin"):
+            textes.append(dict(type="ecran_de_fin", debut=r(s_["t0"] + 0.3), fin=r(s_["t1"]), texte="À demain pour un nouveau verset", note="éléments YouTube (vidéo suivante + s'abonner) à poser dans YouTube Studio, à droite"))
+    for c in tl["cartes"]:
+        textes.append(dict({k: v for k, v in c.items() if k not in ("t0", "t1", "declencheur", "duree")}, debut=r(c["t0"]), fin=r(c["t1"])))
+    if fmt != "long":
+        s0 = tl["segments"][0]
+        textes.append(dict(type="accroche", debut=0.0, fin=r(s0["t1"]), texte=ep["short"]["accroche"].replace("|", " ")))
+        textes.append(dict(type="reference", debut=r(s0["t1"]), fin=r(tl["dur"]), texte=ep["reference_courte"]))
+    textes.sort(key=lambda x: x["debut"])
+    tlj = dict(
+        format=fmt, largeur=1920 if fmt == "long" else 1080, hauteur=1080 if fmt == "long" else 1920, fps=FPS, duree=r(tl["dur"]),
+        unite="secondes depuis le début de la vidéo finale",
+        pistes=dict(video_sans_texte="fond.mp4", voix="voix.m4a", musique="musique.m4a (déjà baissée sous la voix)",
+                    intro_son="intro.m4a" if tl["intro"] else None, sous_titres="sous_titres.srt",
+                    video_complete=f"../../rendu/{ep['id']}_{dict(long='youtube_long', short_youtube='youtube_short', short_tiktok='tiktok')[fmt]}.mp4"),
+        intro=dict(debut=r(tl["intro"]["t0"]), fin=r(tl["intro"]["t1"]), fichier="youtube/intro_1920x1080.mp4", note="déjà incluse dans fond.mp4") if tl["intro"] else None,
+        blocs=[dict(id=s_["id"], debut=r(s_["t0"]), fin=r(s_["t1"]), decor={"s1": "feu de camp", "s2": "chapelle", "s3": "sommet", "s4": "chambre"}[s_["decor"]],
+                    plan=s_["plan"], chapitre=s_.get("chapitre")) for s_ in tl["segments"]],
+        voix=[dict(bloc=v["id"], debut=v["debut"], fichier_original=f"voix/{v['id']}.mp3") for v in tl["voix"]],
+        textes_a_l_ecran=textes,
+        sous_titres=[dict(debut=r(g["t0"]), fin=r(g["t1"]), texte=" ".join(m["txt"] for m in g["mots"]), mots=[dict(debut=r(m["t0"]), fin=r(m["t1"]), texte=m["txt"]) for m in g["mots"]]) for g in tl["soustitres"]],
+    )
+    json.dump(tlj, open(os.path.join(d, "timeline.json"), "w"), ensure_ascii=False, indent=1)
+
+
 def main(ep_dir):
     ep_dir = os.path.abspath(ep_dir)
     ep = json.load(open(os.path.join(ep_dir, "episode.json")))
@@ -466,6 +514,7 @@ def main(ep_dir):
     for fmt in ("long", "short_youtube", "short_tiktok"):
         html, tl = page_video(ep, ep_dir, fmt)
         open(os.path.join(pages, f"{fmt}.html"), "w").write(html)
+        kit_montage(ep, ep_dir, fmt, tl)
         mode = "voix" if tl["piste"]["env"] else "maquette (sans voix)"
         print(f"{fmt:14s} {tl['dur']:7.1f} s  {len(tl['segments'])} blocs  {mode}")
         if fmt == "long":
