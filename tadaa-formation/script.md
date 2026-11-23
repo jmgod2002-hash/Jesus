@@ -1,4 +1,4 @@
-# Tadaa — vidéo TikTok « Formation dropshipping » (22,5 s, 1080×1920)
+# Tadaa — vidéo TikTok « Formation dropshipping » (20,5 s, 1080×1920)
 
 Fichiers : `tadaa_formation_60fps.mp4` (à publier sur TikTok) et `tadaa_formation_120fps.mp4` (master 120 i/s).
 Formation **payante** ; **aucune mention de la Chine** ; aucune promesse de gains.
@@ -17,22 +17,20 @@ Formation **payante** ; **aucune mention de la Chine** ; aucune promesse de gain
 [friendly, urgent] Commente FORMATION... et je t'envoie le programme. À ne pas rater !
 ```
 
-## Ce qui s'affiche (temps clés `K` dans `source/index.html`, à recaler sur la voix)
+## Calage sur la voix (`source/voix_elevenlabs.mp3`, gardée d'un seul tenant)
 
-| Instant | À l'écran | Mot attendu |
+| Mot (transcription) | Instant | Animation |
 |---|---|---|
-| 0 / 0,55 / 1,75 s | « Tu veux vendre » · « des produits » · « sans stock ? » + mascotte | idem / « pas de stock » |
-| 3,15 – 3,5 s | épingle qui tombe + tampon « Tu es au bon endroit ! » | idem |
-| 4,95 – 6,6 s | toque, « Je t'apprends le DROPSHIPPING », « dans ton pays » | idem |
-| 7,6 / 8,3 s | ✓ facilement · ✓ sans stock | idem |
-| 10,2 s | étape 1 « Le client commande » (panier) | Une fois que le client commande |
-| 11,6 s | étape 2 « Tu transmets tout à ton fournisseur » (avion en papier → entrepôt) | tu transmets tout… |
-| 14,0 s | étape 3 « Il livre ton client, pas toi ! » (camionnette) | ce n'est même pas toi… |
-| 15,6 s | tampon « Pas de livraison à gérer ! » | la livraison |
-| 17,45 – 18,75 s | logo, « Commente FORMATION », « et je t'envoie le programme » | idem |
-| 19,65 s | tampon « À ne pas rater ! » + flèche vers les commentaires | idem |
+| « des produits » / « pas de stock » | 0,7 / 2,4 s | « des produits » · pastille « sans stock ? » |
+| « bon endroit » | 3,8 s | le tampon tombe |
+| « dropshipping » / « dans ton pays » | 5,7 / 6,3 s | tampon DROPSHIPPING · « dans ton pays » |
+| « facilement » / « sans stock » | 7,3 / 8,1 s | les deux coches |
+| « client commande » / « tu transmets » | 9,6 / 10,6 s | étapes 1 et 2 |
+| « ce n'est même pas toi » / « livraison » | 13,0 / 14,5 s | étape 3 · tampon « Pas de livraison à gérer ! » |
+| « Commente » / « formation » | 15,4 / 15,7 s | « Commente » · « FORMATION » + confettis |
+| « et je t'envoie » / « À ne pas rater » | 16,5 / 17,6 s | sous-titre + flèche · tampon final |
 
-Quand la voix est générée : la déposer dans `source/voix_elevenlabs.mp3`, remplir `BLOCS` dans `source/rendu.js` et recaler `K`.
+Mixage : bruitages baissés sous la voix, -14 LUFS.
 
 ## Légende TikTok
 Tu veux vendre sans stock ? 📦 Le client commande, ton fournisseur livre. Commente FORMATION pour recevoir le programme 👇

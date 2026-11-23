@@ -25,7 +25,7 @@
 <div id="stage"></div>
 <script>
 // ───────── outils ─────────
-const W = 1080, H = 1920, DUR = 22.5;
+const W = 1080, H = 1920, DUR = 20.5;
 const cl = (x) => Math.max(0, Math.min(1, x));
 const pr = (t, a, d) => cl((t - a) / d);
 const outCubic = (x) => 1 - Math.pow(1 - x, 3);
@@ -71,9 +71,9 @@ const blink = (t, at) => { const x = (t - at) / 0.18; return x <= 0 || x >= 1 ? 
 const SCENES = [
   { start: 0, color: "var(--violet)", from: [540, 960] },
   { start: 3.0, color: "var(--orange)", from: [540, 1500], ring: "rgba(255,255,255,.35)" },
-  { start: 4.8, color: "var(--violet)", from: [880, 260], ring: "rgba(255,243,230,.5)" },
-  { start: 9.6, color: "var(--creme)", from: [160, 1650], ring: "var(--orange)" },
-  { start: 17.2, color: "var(--orange)", from: [540, 600], ring: "rgba(255,255,255,.4)" },
+  { start: 4.6, color: "var(--violet)", from: [880, 260], ring: "rgba(255,243,230,.5)" },
+  { start: 8.85, color: "var(--creme)", from: [160, 1650], ring: "var(--orange)" },
+  { start: 15.1, color: "var(--orange)", from: [540, 600], ring: "rgba(255,255,255,.4)" },
 ];
 SCENES.forEach((sc, i) => {
   const R = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(x - sc.from[0], y - sc.from[1]))) + 10;
@@ -180,12 +180,12 @@ const CONF = Array.from({ length: 40 }, (_, i) => {
 });
 
 // ───────── temps clés (à recaler sur la voix) ─────────
-const K = {
-  s1a: -0.12, s1b: 0.55, s1c: 1.75,
-  pin: 3.15, s2: 3.3,
-  cap: 4.95, s3a: 5.2, s3b: 5.75, s3c: 6.6, chip1: 7.6, chip2: 8.3,
-  s4t: 9.8, row1: 10.2, row2: 11.6, row3: 14.0, s4s: 15.6,
-  logo: 17.35, s5a: 17.45, s5b: 17.95, bubble: 18.2, s5c: 18.75, arrow: 18.9, s5d: 19.65, blink: 21.2,
+const K = { // calés sur la voix ElevenLabs (transcription mot par mot)
+  s1a: -0.12, s1b: 0.6, s1c: 2.35,                       // « Tu veux vendre » · « des produits » · « pas de stock »
+  pin: 3.15, s2: 3.6,                                    // « bon endroit » (3,78 s)
+  cap: 4.7, s3a: 4.85, s3b: 5.55, s3c: 6.2, chip1: 7.2, chip2: 8.05, // « dropshipping » 5,72 · « dans ton pays » 6,26 · « facilement » 7,28 · « sans stock » 8,12
+  s4t: 9.0, row1: 9.5, row2: 10.5, row3: 12.9, s4s: 14.3, // « client commande » 9,62 · « tu transmets » 10,56 · « ce n'est même pas toi » 12,96 · « livraison » 14,5
+  logo: 15.2, s5a: 15.3, s5b: 15.6, bubble: 15.9, s5c: 16.4, arrow: 16.6, s5d: 17.45, blink: 19.4, // « Commente » 15,37 · « formation » 15,66 · « et je t'envoie » 16,46 · « À ne pas rater » 17,63
 };
 
 // ───────── l'image à l'instant t ─────────
