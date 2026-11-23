@@ -1,40 +1,40 @@
-# Tadaa — vidéo TikTok « Formation dropshipping » (24 s, 1080×1920)
+# Tadaa — vidéo TikTok « Formation dropshipping » (22,5 s, 1080×1920)
 
 Fichiers : `tadaa_formation_60fps.mp4` (à publier sur TikTok) et `tadaa_formation_120fps.mp4` (master 120 i/s).
-Formation **payante** : aucun « offert / gratuit » à l'écran ni dans la voix. Aucune promesse de gains.
+Formation **payante** ; **aucune mention de la Chine** ; aucune promesse de gains.
 
 ## Script voix off — ElevenLabs (Eleven v4)
 
 ```
-[excited, curious] Tu veux vendre en ligne... sans acheter de stock ?
+[curious] Tu veux vendre des produits... mais tu n'as pas de stock ?
 
-[confident] Pas de stock à acheter. Pas d'invendus.
+[excited] Tu es au bon endroit !
 
-[warm, clear] Le principe : tu vends d'abord... tu commandes après. Tu publies le produit, le client paie par Mobile Money, tu commandes en Chine... et tu gardes ta marge.
+[warm, confident] Je t'apprends à faire du dropshipping dans ton pays... facilement, et sans stock.
 
-[enthusiastic] Je t'explique tout dans ma formation dropshipping : trouver les bons produits, vendre sur Facebook et TikTok, et commander en Chine pas à pas.
+[clear] Une fois que le client commande, tu transmets tout à ton fournisseur... [playful] et en plus, ce n'est même pas toi qui gères la livraison !
 
 [friendly, urgent] Commente FORMATION... et je t'envoie le programme. À ne pas rater !
 ```
 
-## Ce qui s'affiche (pour caler la voix)
+## Ce qui s'affiche (temps clés `K` dans `source/index.html`, à recaler sur la voix)
 
 | Instant | À l'écran | Mot attendu |
 |---|---|---|
-| 0 s | « Vendre en ligne » | Tu veux vendre en ligne |
-| 1,35 s | « sans stock » puis « à Madagascar ? » | sans acheter de stock |
-| 2,8 – 5,8 s | cartons barrés puis en fumée, « Pas de stock à acheter », tampon « Pas d'invendus » (4,3 s) | Pas de stock… Pas d'invendus |
-| 6,3 / 7,1 s | « Tu vends d'abord, / tu commandes après. » | idem |
-| 8,3 / 9,2 / 10,2 s | étapes : Tu publies · Le client paie (Mobile Money) · Tu commandes en Chine | idem |
-| 11,3 s | « + ta marge » + pièces Ar | et tu gardes ta marge |
-| 13,0 – 14,0 s | la toque tombe, « Ma formation DROPSHIPPING » | ma formation dropshipping |
-| 15,0 / 16,1 / 17,3 s | les 3 coches du programme | trouver… / vendre… / commander… |
-| 19,25 – 20,6 s | logo, « Commente FORMATION », « et je t'envoie le programme » | idem |
-| 21,45 s | tampon « À ne pas rater ! » + flèche vers les commentaires | À ne pas rater ! |
+| 0 / 0,55 / 1,75 s | « Tu veux vendre » · « des produits » · « sans stock ? » + mascotte | idem / « pas de stock » |
+| 3,15 – 3,5 s | épingle qui tombe + tampon « Tu es au bon endroit ! » | idem |
+| 4,95 – 6,6 s | toque, « Je t'apprends le DROPSHIPPING », « dans ton pays » | idem |
+| 7,6 / 8,3 s | ✓ facilement · ✓ sans stock | idem |
+| 10,2 s | étape 1 « Le client commande » (panier) | Une fois que le client commande |
+| 11,6 s | étape 2 « Tu transmets tout à ton fournisseur » (avion en papier → entrepôt) | tu transmets tout… |
+| 14,0 s | étape 3 « Il livre ton client, pas toi ! » (camionnette) | ce n'est même pas toi… |
+| 15,6 s | tampon « Pas de livraison à gérer ! » | la livraison |
+| 17,45 – 18,75 s | logo, « Commente FORMATION », « et je t'envoie le programme » | idem |
+| 19,65 s | tampon « À ne pas rater ! » + flèche vers les commentaires | idem |
 
-Quand la voix est générée : la déposer dans `source/voix_elevenlabs.mp3`, remplir `BLOCS` dans `source/rendu.js` et recaler les temps.
+Quand la voix est générée : la déposer dans `source/voix_elevenlabs.mp3`, remplir `BLOCS` dans `source/rendu.js` et recaler `K`.
 
 ## Légende TikTok
-Vendre sans stock à Madagascar 📦 Tu vends d'abord, tu commandes après. Commente FORMATION pour recevoir le programme 👇
+Tu veux vendre sans stock ? 📦 Le client commande, ton fournisseur livre. Commente FORMATION pour recevoir le programme 👇
 
-#Madagascar #Tana #Dropshipping #VendreEnLigne #ImportChine #Tadaa #pourtoi
+#Madagascar #Tana #Dropshipping #VendreEnLigne #SansStock #Tadaa #pourtoi

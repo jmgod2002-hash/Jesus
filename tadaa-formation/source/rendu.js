@@ -4,7 +4,7 @@
 // node rendu.js                         → ../tadaa_formation_120fps.mp4 (120 i/s) + ../tadaa_formation_60fps.mp4 (60 i/s, flou de mouvement : 2 images fondues)
 const { chromium } = require("playwright");
 const fs = require("fs"), path = require("path"), { execFileSync } = require("child_process");
-const ROOT = __dirname, OUT = path.join(ROOT, "renders"), DUR = 24, FPS = 120, WORKERS = 6;
+const ROOT = __dirname, OUT = path.join(ROOT, "renders"), DUR = 22.5, FPS = 120, WORKERS = 6;
 // Voix ElevenLabs (facultative) : [début parole, fin parole, instant où elle doit commencer dans la vidéo]
 // Tant que voix_elevenlabs.mp3 est absent, la vidéo sort avec les bruitages seuls.
 const VOIX = path.join(ROOT, "voix_elevenlabs.mp3"), BLOCS = [];
@@ -31,7 +31,7 @@ const shot = async (p, t, f) => { await p.evaluate((x) => window.seek(x), t); aw
   if (process.argv.includes("--son")) { // ne refait que le mixage audio (contrôle rapide)
     const p = await open(browser); fs.writeFileSync(path.join(OUT, "son.wav"), Buffer.from(await p.evaluate(() => window.renderAudio()), "base64")); await browser.close(); MIX(); return; }
   if (process.argv.includes("--planche")) {
-    const i = process.argv.indexOf("--at"), times = i > 0 ? process.argv[i + 1].split(",").map(Number) : [0, 2.4, 3.4, 3.8, 4.15, 4.9, 7.6, 9.6, 11.6, 13.7, 14.6, 17.8, 20.3, 22.5];
+    const i = process.argv.indexOf("--at"), times = i > 0 ? process.argv[i + 1].split(",").map(Number) : [0, 2.4, 3.6, 4.3, 5.6, 6.9, 8.6, 10.8, 12.6, 15.0, 16.3, 18.3, 19.4, 22];
     const p = await open(browser); fs.readdirSync(OUT).filter((f) => f.startsWith("s")).forEach((f) => fs.rmSync(path.join(OUT, f)));
     for (const [k, t] of times.entries()) await shot(p, t, path.join(OUT, `s${String(k).padStart(2, "0")}.jpg`));
     ff(["-i", path.join(OUT, "s%02d.jpg"), "-vf", `scale=360:-2,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='%{n}':x=8:y=8:fontsize=26:fontcolor=yellow:box=1:boxcolor=black,tile=${Math.min(6, times.length)}x${Math.ceil(times.length / 6)}`, "-frames:v", "1", path.join(OUT, "planche.jpg")]);
