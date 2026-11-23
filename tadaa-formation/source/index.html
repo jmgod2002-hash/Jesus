@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tadaa Formation</title>
+<script src="t_path.js"></script>
+<style>
+  @font-face { font-family: "Fredoka"; font-weight: 600; src: url(fonts/fredoka-latin-600-normal.woff2) format("woff2"); }
+  @font-face { font-family: "Fredoka"; font-weight: 700; src: url(fonts/fredoka-latin-700-normal.woff2) format("woff2"); }
+  :root { --violet: #64429e; --orange: #fe6132; --creme: #fff3e6; --nuit: #2b1a4a; --jaune: #ffd23f; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #111; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: "Fredoka", sans-serif; font-weight: 700; }
+  .layer, .content { position: absolute; inset: 0; }
+  .content { transform-origin: 540px 960px; }
+  .wipe { position: absolute; border-radius: 50%; }
+  .a { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }
+  .txt { color: #fff; line-height: 1; letter-spacing: -0.01em; }
+  .pill { border-radius: 999px; padding: 18px 48px 24px; }
+  .blob { border-radius: 50%; }
+  svg { display: block; overflow: visible; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+// ───────── outils ─────────
+const W = 1080, H = 1920, DUR = 24;
+const cl = (x) => Math.max(0, Math.min(1, x));
+const pr = (t, a, d) => cl((t - a) / d);
+const outCubic = (x) => 1 - Math.pow(1 - x, 3);
+const outQuint = (x) => 1 - Math.pow(1 - x, 5);
+const inCubic = (x) => x * x * x;
+const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const outBack = (x, s = 1.7) => 1 + (s + 1) * Math.pow(x - 1, 3) + s * Math.pow(x - 1, 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+// ressort amorti : 0 → 1 avec un léger dépassement, mouvement organique
+const spring = (t, a, f = 1.8, d = 8) => { const x = t - a; return x <= 0 ? 0 : 1 - Math.exp(-d * x) * Math.cos(2 * Math.PI * f * x); };
+// écrasement à l'atterrissage (1 au repos)
+const squash = (t, a, amp = 0.22, f = 2.6, d = 7) => { const x = t - a; return x <= 0 ? 1 : 1 - amp * Math.exp(-d * x) * Math.cos(2 * Math.PI * f * x); };
+const keys = (t, ks, ease = inOut) => { if (t <= ks[0][0]) return ks[0][1]; for (let i = 1; i < ks.length; i++) if (t <= ks[i][0]) return lerp(ks[i - 1][1], ks[i][1], ease((t - ks[i - 1][0]) / (ks[i][0] - ks[i - 1][0]))); return ks[ks.length - 1][1]; };
+let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+const stage = document.getElementById("stage");
+const el = (html, parent = stage) => { const d = document.createElement("div"); d.innerHTML = html.trim(); const n = d.firstChild; parent.appendChild(n); return n; };
+// place un élément par son centre ; org = point fixe des échelles (ex. "50% 100%" = pied)
+const place = (n, { x = 540, y = 960, s = 1, sx = 1, sy = 1, r = 0, o = 1, org } = {}) => {
+  if (org) n.style.transformOrigin = org;
+  n.style.transform = `translate(${x}px,${y}px) translate(-50%,-50%) rotate(${r}deg) scale(${s * sx},${s * sy})`;
+  n.style.opacity = o; n.style.visibility = o <= 0.001 || Math.abs(s * sx * sy) < 0.001 ? "hidden" : "visible";
+};
+const setT = (n, tr) => n.setAttribute("transform", tr);
+
+// ───────── mascotte (le T à l'œil) ─────────
+const T = window.T_PATH; let mid = 0;
+function mascot(parent, width) {
+  const id = "m" + mid++;
+  const n = el(`<div class="a" style="width:${width}px"><svg viewBox="190 200 880 910" width="${width}" height="${width * 910 / 880}">
+    <defs><clipPath id="${id}t"><path d="${T}"/></clipPath><clipPath id="${id}e"><ellipse cx="382" cy="418" rx="82" ry="122" transform="rotate(3 382 418)"/></clipPath></defs>
+    <path d="${T}" fill="#fe6132"/>
+    <g clip-path="url(#${id}t)"><g class="lid"><ellipse cx="382" cy="418" rx="82" ry="122" transform="rotate(3 382 418)" fill="#fff"/>
+    <g clip-path="url(#${id}e)"><circle class="pupil" cx="444" cy="458" r="50" fill="#fe6132"/></g></g></g></svg></div>`, parent);
+  n.eye = (open, dx = 0, dy = 0) => { setT(n.querySelector(".lid"), `translate(382 430) scale(1 ${Math.max(0.06, open)}) translate(-382 -430)`); setT(n.querySelector(".pupil"), `translate(${dx} ${dy})`); };
+  return n;
+}
+// clignement doux (fermeture/ouverture en 0,18 s)
+const blink = (t, at) => { const x = (t - at) / 0.18; return x <= 0 || x >= 1 ? 1 : 0.06 + 0.94 * Math.abs(Math.cos(Math.PI * x)); };
+
+
+// ───────── couches : chaque scène ouvre son fond en cercle, précédé d'un anneau clair ─────────
+const SCENES = [
+  { start: 0, color: "var(--violet)", from: [540, 960] },
+  { start: 2.8, color: "var(--orange)", from: [540, 1500], ring: "rgba(255,255,255,.35)" },
+  { start: 5.8, color: "var(--creme)", from: [880, 260], ring: "var(--orange)" },
+  { start: 12.8, color: "var(--violet)", from: [160, 1650], ring: "rgba(255,243,230,.5)" },
+  { start: 19.0, color: "var(--orange)", from: [540, 600], ring: "rgba(255,255,255,.4)" },
+];
+SCENES.forEach((sc, i) => {
+  const R = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(x - sc.from[0], y - sc.from[1]))) + 10;
+  const circ = (bg) => `<div class="wipe" style="width:${2 * R}px;height:${2 * R}px;left:${sc.from[0] - R}px;top:${sc.from[1] - R}px;background:${bg}"></div>`;
+  sc.layer = el(`<div class="layer"></div>`);
+  if (sc.ring) sc.ringEl = el(circ(sc.ring), sc.layer);
+  sc.wipe = el(circ(sc.color), sc.layer);
+  sc.c = el(`<div class="content"></div>`, sc.layer);
+  sc.end = SCENES[i + 1] ? SCENES[i + 1].start : DUR;
+});
+const [S1, S2, S3, S4, S5] = SCENES.map((s) => s.c);
+const deco = (parent, list, color) => list.map(([x, y, r]) => ({ x, y, r, n: el(`<div class="a blob" style="width:${2 * r}px;height:${2 * r}px;background:${color}"></div>`, parent) }));
+const decoV1 = deco(S1, [[120, 260, 90], [960, 520, 140], [170, 1500, 60], [900, 1650, 110]], "rgba(255,255,255,.07)");
+const decoO2 = deco(S2, [[150, 330, 120], [940, 1350, 170], [120, 1650, 70]], "rgba(255,255,255,.12)");
+const decoC3 = deco(S3, [[990, 1000, 120], [70, 1560, 90]], "rgba(254,97,50,.07)");
+const decoV4 = deco(S4, [[960, 180, 120], [110, 1600, 150], [990, 1650, 60]], "rgba(255,255,255,.07)");
+const decoO5 = deco(S5, [[130, 250, 110], [980, 1500, 150], [150, 1700, 90]], "rgba(255,255,255,.12)");
+const floatDeco = (arr, t) => arr.forEach((d, i) => place(d.n, { x: d.x + Math.sin(t * 0.9 + i * 2) * 22, y: d.y + Math.cos(t * 0.7 + i) * 28, s: 1 + 0.06 * Math.sin(t * 1.3 + i) }));
+const svgEl = (tag, attrs, parent) => { const n = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+// tracé progressif d'un chemin SVG (0 → 1)
+const draw = (p, k) => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L * (1 - cl(k)); };
+const BOX = `<svg width="100%" height="100%" viewBox="0 0 100 100"><path d="M50 8 L90 26 L90 74 L50 92 L10 74 L10 26 Z" fill="#c98a4b"/><path d="M50 44 L90 26 L90 74 L50 92 Z" fill="#a86d34"/><path d="M10 26 L50 44 L90 26 L50 8 Z" fill="#e0a86a"/><path d="M30 17 L70 35 L70 50 L62 54 L62 39 L22 21 Z" fill="#fe6132"/></svg>`;
+
+// ───────── scène 1 : accroche ─────────
+const s1a = el(`<div class="a txt" style="font-size:112px">Vendre en ligne</div>`, S1);
+const s1b = el(`<div class="a txt" style="font-size:200px;letter-spacing:-0.02em">sans stock</div>`, S1);
+const s1c = el(`<div class="a txt pill" style="font-size:120px;background:#fff;color:var(--orange)">à Madagascar ?</div>`, S1);
+const m1 = mascot(S1, 560);
+
+// ───────── scène 2 : pas de stock, pas d'invendus ─────────
+const boxes = [[400, 720, 230, -8], [680, 720, 230, 6], [540, 520, 230, -2]].map(([x, y, w, r]) => ({ x, y, r, n: el(`<div class="a" style="width:${w}px;height:${w}px">${BOX}</div>`, S2) }));
+const cross = el(`<svg class="a" width="560" height="560" viewBox="0 0 100 100"><path class="c1" d="M14 14 L86 86" stroke="#2b1a4a" stroke-width="10" stroke-linecap="round" fill="none"/><path class="c2" d="M86 14 L14 86" stroke="#2b1a4a" stroke-width="10" stroke-linecap="round" fill="none"/></svg>`, S2);
+const poofs = Array.from({ length: 12 }, (_, i) => ({ a: (i / 12) * Math.PI * 2 + 0.3, v: 260 + (i % 3) * 90, n: el(`<div class="a blob" style="width:${70 + (i % 4) * 18}px;height:${70 + (i % 4) * 18}px;background:rgba(255,255,255,.85)"></div>`, S2) }));
+const s2a = el(`<div class="a txt" style="font-size:96px">Pas de stock à acheter</div>`, S2);
+const s2b = el(`<div class="a txt pill" style="font-size:110px;background:var(--violet);box-shadow:0 14px 0 var(--nuit)">Pas d'invendus</div>`, S2);
+
+// ───────── scène 3 : le principe en 3 étapes ─────────
+const s3a = el(`<div class="a txt" style="font-size:86px;color:var(--violet)">Tu vends d'abord,</div>`, S3);
+const s3b = el(`<div class="a txt" style="font-size:86px;color:var(--orange)">tu commandes après.</div>`, S3);
+const ICON3 = [
+  // 1 — tu publies : téléphone avec une publication, des cœurs s'envolent
+  { svg: `<rect x="27" y="6" width="46" height="88" rx="11" fill="#64429e"/><rect x="32" y="16" width="36" height="64" rx="4" fill="#fff"/><rect class="post" x="36" y="22" width="28" height="26" rx="3" fill="#fe6132"/><rect x="36" y="53" width="24" height="5" rx="2.5" fill="#d9cdee"/><rect x="36" y="62" width="16" height="5" rx="2.5" fill="#d9cdee"/>${[0, 1, 2].map((i) => `<path class="h${i}" d="M0 4 C -7 -2, -5 -9, 0 -5 C 5 -9, 7 -2, 0 4Z" fill="#fe6132"/>`).join("")}`,
+    anim: (q, lt) => { setT(q.post, `translate(50 35) scale(${1 + 0.06 * Math.sin(lt * 4)}) translate(-50 -35)`);
+      [q.h0, q.h1, q.h2].forEach((h, i) => { const u = (lt * 0.8 + i / 3) % 1; setT(h, `translate(${74 + Math.sin(u * 8 + i) * 6} ${60 - u * 62}) scale(${0.6 + 0.9 * u})`); h.setAttribute("opacity", Math.sin(u * Math.PI)); }); } },
+  // 2 — le client paie : une pièce « Ar » tombe dans le téléphone, coche verte
+  { svg: `<rect x="27" y="16" width="46" height="80" rx="11" fill="#64429e"/><rect x="32" y="26" width="36" height="56" rx="4" fill="#fff"/><g class="chk"><circle cx="50" cy="54" r="15" fill="#2fb36d"/><path d="M43 54 l5 5 l9 -10" stroke="#fff" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g><g class="coin"><circle cx="0" cy="0" r="15" fill="#ffd23f" stroke="#e0a800" stroke-width="3"/><text x="0" y="5.5" font-size="15" font-family="Fredoka" font-weight="700" fill="#64429e" text-anchor="middle">Ar</text></g>`,
+    anim: (q, lt) => { const ph = (lt % 1.8) / 1.8, fall = cl(ph / 0.35);
+      setT(q.coin, `translate(50 ${lerp(-12, 40, inCubic(fall))}) scale(${ph < 0.35 ? 1 : 1 - cl((ph - 0.35) / 0.08)}, 1) rotate(${ph * 200})`);
+      const c = ph < 0.4 ? 0 : spring(ph * 1.8, 0.72, 2, 8) * (1 - cl((ph - 0.9) / 0.1)); setT(q.chk, `translate(50 54) scale(${c}) translate(-50 -54)`); } },
+  // 3 — tu commandes en Chine : colis + avion qui tourne autour
+  { svg: `<g class="bx"><path d="M50 30 L82 44 L82 80 L50 94 L18 80 L18 44 Z" fill="#c98a4b"/><path d="M50 58 L82 44 L82 80 L50 94 Z" fill="#a86d34"/><path d="M18 44 L50 58 L82 44 L50 30 Z" fill="#e0a86a"/><path d="M34 37 L66 51 L66 62 L60 65 L60 54 L28 40 Z" fill="#fe6132"/></g><g class="pl"><path d="M14 0 C 14 -2.5, 11 -3.5, 8 -3.5 L1 -3.5 L-7 -14 L-11 -14 L-7 -3.5 L-13 -3.5 L-16 -8 L-19 -8 L-17 0 L-19 8 L-16 8 L-13 3.5 L-7 3.5 L-11 14 L-7 14 L1 3.5 L8 3.5 C 11 3.5, 14 2.5, 14 0Z" fill="#64429e"/></g>`,
+    anim: (q, lt) => { const a = lt * 2.4, x = 50 + Math.cos(a) * 40, y = 28 + Math.sin(a) * 14; setT(q.pl, `translate(${x} ${y}) rotate(${a * 180 / Math.PI + 90}) scale(${0.9 + 0.2 * Math.sin(a)})`);
+      setT(q.bx, `translate(0 ${-3 * Math.abs(Math.sin(lt * 3))})`); } },
+];
+const rows = [["Tu publies", "sur Facebook, TikTok…"], ["Le client paie", "par Mobile Money"], ["Tu commandes", "en Chine"]].map(([a, b], i) => {
+  const card = el(`<div class="a" style="width:210px;height:210px;border-radius:48px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 0 rgba(100,66,158,.18)"><svg width="150" height="150" viewBox="0 0 100 100">${ICON3[i].svg}</svg></div>`, S3);
+  card.q = {}; card.querySelectorAll("[class]").forEach((n) => (card.q[n.getAttribute("class")] = n));
+  const txt = el(`<div class="a" style="width:560px"><div class="txt" style="font-size:66px;color:var(--nuit)">${a}</div><div class="txt" style="font-size:46px;font-weight:600;color:var(--violet);margin-top:10px">${b}</div></div>`, S3);
+  return { card, txt, anim: ICON3[i].anim };
+});
+const links = el(`<svg class="a" width="1080" height="1920" viewBox="0 0 1080 1920">${[0, 1].map((i) => `<path class="k${i}" d="M200 ${745 + i * 260} L200 ${815 + i * 260}" stroke="#fe6132" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 20" fill="none"/>`).join("")}</svg>`, S3);
+const marge = el(`<div class="a txt pill" style="font-size:78px;background:var(--orange);box-shadow:0 12px 0 rgba(43,26,74,.25)">+ ta marge</div>`, S3);
+const coins = Array.from({ length: 5 }, () => el(`<div class="a"><svg width="80" height="80" viewBox="-20 -20 40 40"><circle r="17" fill="#ffd23f" stroke="#e0a800" stroke-width="3"/><text y="5.5" font-size="15" font-family="Fredoka" font-weight="700" fill="#64429e" text-anchor="middle">Ar</text></svg></div>`, S3));
+
+// ───────── scène 4 : la formation (payante) ─────────
+const rays = el(`<svg class="a" width="760" height="760" viewBox="-100 -100 200 200">${Array.from({ length: 12 }, (_, i) => `<path d="M0 0 L-9 -100 L9 -100 Z" fill="rgba(255,210,63,.22)" transform="rotate(${i * 30})"/>`).join("")}</svg>`, S4);
+// toque de diplômé : la formation (payante), pas un cadeau
+const cap = el(`<div class="a"><svg width="360" height="360" viewBox="0 0 100 100">
+  <path d="M26 44 L26 64 C 26 74, 74 74, 74 64 L74 44 L50 54 Z" fill="#d94a22"/>
+  <path d="M50 16 L95 35 L50 54 L5 35 Z" fill="#fe6132"/><path d="M50 16 L95 35 L50 40 L5 35 Z" fill="#ff7a52"/>
+  <path d="M50 35 L84 39" stroke="#ffd23f" stroke-width="2.6" stroke-linecap="round"/><circle cx="50" cy="35" r="3.6" fill="#ffd23f"/>
+  <g class="tas"><path d="M84 39 L84 60" stroke="#ffd23f" stroke-width="2.6" stroke-linecap="round"/><path d="M80 58 L88 58 L89.5 72 L78.5 72 Z" fill="#ffd23f"/></g></svg></div>`, S4);
+const tassel = cap.querySelector(".tas");
+const stars = Array.from({ length: 10 }, (_, i) => ({ a: -Math.PI / 2 + (i - 4.5) * 0.28, v: 300 + (i % 3) * 80, n: el(`<div class="a"><svg width="54" height="54" viewBox="-10 -10 20 20"><path d="M0 -9 L2.6 -2.6 L9 0 L2.6 2.6 L0 9 L-2.6 2.6 L-9 0 L-2.6 -2.6Z" fill="${i % 2 ? "#ffd23f" : "#fff"}"/></svg></div>`, S4) }));
+const s4a = el(`<div class="a txt" style="font-size:112px">Ma formation</div>`, S4);
+const s4b = el(`<div class="a txt pill" style="font-size:104px;background:#fff;color:var(--orange);box-shadow:0 14px 0 var(--nuit)">DROPSHIPPING</div>`, S4);
+const checks = ["Trouver les bons produits", "Vendre sur Facebook et TikTok", "Commander en Chine pas à pas"].map((label) => {
+  const r = el(`<div class="a" style="display:flex;align-items:center;gap:26px;width:880px"><svg width="84" height="84" viewBox="0 0 100 100" style="flex:none"><circle class="ring" cx="50" cy="50" r="46" fill="#fe6132"/><path class="tick" d="M28 52 L44 67 L73 35" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><div class="txt" style="font-size:54px">${label}</div></div>`, S4);
+  r.ring = r.querySelector(".ring"); r.tick = r.querySelector(".tick"); return r; });
+
+// ───────── scène 5 : appel à l'action ─────────
+const logo = el(`<div class="a"><svg width="380" height="380" viewBox="0 0 1254 1254">
+  <defs><clipPath id="ld"><circle cx="626.5" cy="623.5" r="612"/></clipPath><clipPath id="lt"><path d="${T}"/></clipPath>
+  <clipPath id="le"><ellipse cx="382" cy="418" rx="82" ry="122" transform="rotate(3 382 418)"/></clipPath></defs>
+  <circle cx="626.5" cy="623.5" r="612" fill="#64429e"/>
+  <g clip-path="url(#ld)"><g id="lT"><path d="${T}" fill="#fe6132"/><g clip-path="url(#lt)"><g id="lLid">
+  <ellipse cx="382" cy="418" rx="82" ry="122" transform="rotate(3 382 418)" fill="#fff"/><g clip-path="url(#le)"><circle id="lPupil" cx="444" cy="458" r="50" fill="#fe6132"/></g></g></g></g></g></svg></div>`, S5);
+const lT = logo.querySelector("#lT"), lLid = logo.querySelector("#lLid"), lPupil = logo.querySelector("#lPupil");
+const s5a = el(`<div class="a txt" style="font-size:120px">Commente</div>`, S5);
+const s5b = el(`<div class="a txt pill" style="font-size:140px;background:#fff;color:var(--violet);box-shadow:0 14px 0 var(--nuit);padding:22px 60px 30px">FORMATION</div>`, S5);
+const bubble = el(`<div class="a"><svg width="190" height="170" viewBox="0 0 100 90"><path d="M50 6 C 76 6, 94 20, 94 40 C 94 60, 76 74, 50 74 C 44 74, 38 73, 33 71 L14 84 L18 64 C 10 58, 6 50, 6 40 C 6 20, 24 6, 50 6Z" fill="#64429e"/>${[0, 1, 2].map((i) => `<circle class="d${i}" cx="${32 + i * 18}" cy="40" r="7" fill="#fff"/>`).join("")}</svg></div>`, S5);
+const dots = [0, 1, 2].map((i) => bubble.querySelector(`.d${i}`));
+const s5c = el(`<div class="a txt" style="font-size:66px">et je t'envoie le programme</div>`, S5);
+const s5d = el(`<div class="a txt" style="font-size:96px;background:var(--violet);border-radius:40px;padding:26px 54px 34px;box-shadow:0 14px 0 var(--nuit)">À ne pas rater !</div>`, S5);
+const arrow = el(`<svg class="a" width="1080" height="1920" viewBox="0 0 1080 1920"><path class="ar" d="M790 1090 C 900 1080, 960 1130, 975 1215" stroke="#fff" stroke-width="16" stroke-linecap="round" fill="none"/><path class="ah" d="M950 1190 L977 1228 L1004 1188" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`, S5);
+const arPath = arrow.querySelector(".ar"), arHead = arrow.querySelector(".ah");
+const confetti = el(`<svg class="a" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>`, S5);
+const CONF = Array.from({ length: 40 }, (_, i) => {
+  const a = -Math.PI / 2 + (rnd() - 0.5) * 2.8, v = 700 + rnd() * 900, col = ["#64429e", "#fff", "#ffd23f", "#2b1a4a", "#fff3e6"][i % 5];
+  const n = svgEl(i % 3 ? "rect" : "circle", i % 3 ? { width: 18 + rnd() * 14, height: 30 + rnd() * 16, x: -14, y: -20, fill: col } : { r: 11 + rnd() * 7, fill: col }, confetti);
+  return { n, vx: Math.cos(a) * v, vy: Math.sin(a) * v, spin: (rnd() - 0.5) * 900, flip: 4 + rnd() * 6, ph: rnd() * 6 };
+});
+
+// ───────── l'image à l'instant t ─────────
+window.seek = (t) => {
+  SCENES.forEach((sc, i) => {
+    const next = SCENES[i + 1], visible = t >= sc.start - 0.1 && (!next || t < next.start + 0.65);
+    sc.layer.style.display = visible ? "block" : "none";
+    if (!visible) return;
+    if (i > 0) { sc.wipe.style.transform = `scale(${inOut(pr(t, sc.start, 0.6))})`; sc.ringEl.style.transform = `scale(${inOut(pr(t, sc.start - 0.08, 0.6))})`; }
+    const inK = i === 0 ? 1 : outCubic(pr(t, sc.start + 0.1, 0.5)), outK = next ? inCubic(pr(t, next.start, 0.5)) : 0;
+    const z = (0.94 + 0.06 * inK) * (1 + 0.025 * pr(t, sc.start, sc.end - sc.start)) * (1 + 0.12 * outK);
+    const shake = (a) => (t > a && t < a + 0.4 ? Math.sin(t * 95) * 16 * Math.exp(-(t - a) * 9) : 0);
+    const sh = i === 1 ? shake(4.0) : i === 4 ? shake(21.65) : 0;
+    sc.c.style.transform = `translate(${sh}px, ${sh * 0.5}px) scale(${z})`;
+    sc.c.style.opacity = i === 0 ? 1 : Math.min(inK, 1 - outK);
+  });
+
+  // 1 — accroche
+  floatDeco(decoV1, t);
+  place(s1a, { y: 470, s: spring(t, -0.12), r: -6 * (1 - outCubic(pr(t, -0.12, 0.45))) });
+  place(s1b, { y: 650, s: spring(t, 1.35), r: 6 * (1 - outCubic(pr(t, 1.35, 0.45))) });
+  place(s1c, { y: 860, s: spring(t, 1.9), r: lerp(-10, -3, outCubic(pr(t, 1.9, 0.5))) + Math.sin((t - 2.4) * 4) * 1.5 * pr(t, 2.4, 0.4) });
+  const rise = spring(t, 0.5, 1.4, 6.5);
+  place(m1, { y: lerp(2300, 1500, rise) + Math.sin(t * 2.2) * 8 * pr(t, 1.3, 0.5), r: 6 + Math.sin(t * 2.6) * 2.5, org: "50% 100%", sy: squash(t, 0.85, 0.1), sx: 2 - squash(t, 0.85, 0.1) });
+  const open1 = t < 1.0 ? 0.06 : lerp(0.06, 1, outBack(pr(t, 1.0, 0.2), 2.5));
+  m1.eye(open1 * blink(t, 2.3), keys(t, [[1.2, 0], [1.5, -40]]), keys(t, [[1.2, 0], [1.5, -46]]));
+
+  // 2 — pas de stock : les cartons apparaissent, sont barrés, puis partent en fumée
+  floatDeco(decoO2, t);
+  const poofT = 4.0;
+  boxes.forEach((b, i) => { const a = 2.95 + i * 0.1, cs = squash(t, a + 0.25, 0.18);
+    const gone = inCubic(pr(t, poofT, 0.18));
+    place(b.n, { x: b.x, y: lerp(b.y - 400, b.y, inCubic(pr(t, a, 0.25))) + Math.sin(t * 40 + i) * 5 * pr(t, 3.75, 0.1) * (t < poofT ? 1 : 0), r: b.r, org: "50% 100%", sy: cs, sx: 2 - cs, s: 1 - gone, o: t < a ? 0 : 1 }); });
+  draw(cross.querySelector(".c1"), outCubic(pr(t, 3.55, 0.18))); draw(cross.querySelector(".c2"), outCubic(pr(t, 3.7, 0.18)));
+  place(cross, { y: 650, o: t < 3.55 ? 0 : 1 - pr(t, poofT, 0.15), s: 1 + 0.1 * outCubic(pr(t, poofT, 0.15)) });
+  poofs.forEach((p) => { const k = pr(t, poofT, 0.7); place(p.n, { x: 540 + Math.cos(p.a) * p.v * outCubic(k), y: 650 + Math.sin(p.a) * p.v * outCubic(k), s: t < poofT ? 0 : lerp(1.2, 0.2, k), o: 1 - k }); });
+  place(s2a, { y: 1060, s: spring(t, 3.05) });
+  place(s2b, { y: 1230, s: t < 4.3 ? 0 : lerp(2.2, 1, inCubic(pr(t, 4.3, 0.2))) * (t > 4.5 ? squash(t, 4.5, 0.08, 3, 7) : 1), r: -4, o: outCubic(pr(t, 4.3, 0.2)) });
+
+  // 3 — le principe
+  floatDeco(decoC3, t);
+  place(s3a, { y: 240, s: spring(t, 6.3) });
+  place(s3b, { y: 345, s: spring(t, 7.1) });
+  [8.3, 9.2, 10.2].forEach((a, i) => { const r = rows[i], k = outQuint(pr(t, a, 0.55)), cs = spring(t, a, 1.8, 7);
+    place(r.card, { x: 200, y: 640 + i * 260, s: cs, r: (1 - outCubic(pr(t, a, 0.5))) * (i % 2 ? 14 : -14) + Math.sin(t * 2 + i) * 1.5 * pr(t, a + 0.5, 0.4) });
+    place(r.txt, { x: 640, y: 640 + i * 260, o: outCubic(pr(t, a + 0.08, 0.3)), sx: 1, s: 1, r: 0 }); r.txt.style.transform += ` translateX(${lerp(80, 0, k)}px)`;
+    r.anim(r.card.q, Math.max(0, t - a - 0.2)); });
+  draw(links.querySelector(".k0"), pr(t, 8.9, 0.3)); draw(links.querySelector(".k1"), pr(t, 9.8, 0.3));
+  place(marge, { y: 1440, s: spring(t, 11.3), r: -3 + Math.sin((t - 11.8) * 3) * 1.5 * pr(t, 11.8, 0.4) });
+  coins.forEach((c, i) => { const a = 11.4 + i * 0.07, u = t - a, x = 540 + (i - 2) * 140, vy = -900 - (i % 2) * 200;
+    place(c, { x: x + (i - 2) * 60 * u, y: 1400 + vy * u + 2400 * u * u, r: u * 360 * (i % 2 ? 1 : -1), s: u < 0 || u > 0.9 ? 0 : 1, o: 1 - cl((u - 0.6) / 0.3) }); });
+
+  // 4 — la formation
+  floatDeco(decoV4, t);
+  const capFall = inCubic(pr(t, 13.0, 0.35)), capSq = squash(t, 13.35, 0.2, 2.6, 7);
+  place(rays, { y: 470, s: lerp(0.4, 1, outCubic(pr(t, 13.35, 0.6))), r: t * 18, o: t < 13.35 ? 0 : 1 });
+  place(cap, { y: lerp(-300, 480, capFall) + Math.sin(t * 2.2) * 8 * pr(t, 14.0, 0.5), r: lerp(-25, 0, capFall) + Math.sin(t * 1.7) * 2 * pr(t, 14.0, 0.5), org: "50% 75%", sy: capSq, sx: 2 - capSq, o: t < 13.0 ? 0 : 1 });
+  const tu = Math.max(0, t - 13.35);
+  setT(tassel, `rotate(${(t < 13.35 ? -20 : 28 * Math.exp(-2 * tu) * Math.sin(9 * tu)) + 4 * Math.sin(t * 2.4)} 84 39)`);
+  stars.forEach((s) => { const u = t - 13.35; place(s.n, { x: 540 + Math.cos(s.a) * s.v * (1 - Math.exp(-3 * Math.max(0, u))), y: 470 + Math.sin(s.a) * s.v * (1 - Math.exp(-3 * Math.max(0, u))) + 120 * Math.max(0, u) * Math.max(0, u), s: u < 0 ? 0 : 1 - cl((u - 0.6) / 0.5), r: u * 200 }); });
+  place(s4a, { y: 760, s: spring(t, 13.3) });
+  place(s4b, { y: 910, s: t < 13.85 ? 0 : lerp(2.2, 1, inCubic(pr(t, 13.85, 0.2))) * (t > 14.05 ? squash(t, 14.05, 0.08, 3, 7) : 1), r: -3 + Math.sin((t - 14.5) * 3) * 1.5 * pr(t, 14.5, 0.4), o: outCubic(pr(t, 13.85, 0.2)) });
+  checks.forEach((c, i) => { const a = [15.0, 16.1, 17.3][i], k = outQuint(pr(t, a, 0.5));
+    place(c, { x: 540 + lerp(-100, 0, k), y: 1110 + i * 112, o: outCubic(pr(t, a, 0.3)) });
+    setT(c.ring, `translate(50 50) scale(${spring(t, a, 1.8, 7)}) translate(-50 -50)`); draw(c.tick, outCubic(pr(t, a + 0.15, 0.25))); });
+
+  // 5 — commente FORMATION
+  floatDeco(decoO5, t);
+  place(logo, { y: 400, s: spring(t, 19.15, 1.6, 7), r: Math.sin((t - 20) * 2) * 1.6 * pr(t, 20, 0.5) });
+  const drop = inCubic(pr(t, 19.3, 0.3)), sq = squash(t, 19.6, 0.2, 2.6, 7);
+  setT(lT, `translate(0 ${lerp(-1250, 0, drop)}) translate(690 1060) scale(${t < 19.6 ? 0.95 : 2 - sq} ${t < 19.6 ? 1.08 : sq}) translate(-690 -1060)`);
+  const lid5 = (t < 19.8 ? 0.06 : lerp(0.06, 1, outBack(pr(t, 19.8, 0.2), 2.5))) * blink(t, 23.0);
+  setT(lLid, `translate(382 430) scale(1 ${Math.max(0.06, lid5)}) translate(-382 -430)`);
+  setT(lPupil, `translate(${keys(t, [[20.0, 0], [20.3, -10], [21.0, -10], [21.3, 0]])} ${keys(t, [[20.0, 0], [20.3, 34], [21.0, 34], [21.3, 0]])})`);
+  place(s5a, { y: 720, s: spring(t, 19.25) });
+  place(s5b, { y: 880, s: spring(t, 19.75) * (1 + 0.04 * Math.sin((t - 20.4) * 6) * pr(t, 20.4, 0.4)), r: -2 });
+  place(bubble, { x: 950, y: 690, s: 0.85 * spring(t, 20.0, 1.8, 7), r: 8 + Math.sin(t * 3) * 3 });
+  dots.forEach((d, i) => setT(d, `translate(0 ${-6 * Math.max(0, Math.sin((t - 20.2) * 7 - i * 0.9))})`));
+  place(s5c, { y: 1030, o: outCubic(pr(t, 20.55, 0.35)), s: 1 }); s5c.style.transform += ` translateY(${lerp(40, 0, outQuint(pr(t, 20.55, 0.5)))}px)`;
+  draw(arPath, outCubic(pr(t, 20.7, 0.35))); draw(arHead, outCubic(pr(t, 21.0, 0.15)));
+  arrow.style.transform = `translate(${Math.sin((t - 21.2) * 6) * 8 * pr(t, 21.2, 0.3)}px, ${Math.sin((t - 21.2) * 6) * 8 * pr(t, 21.2, 0.3)}px)`;
+  place(s5d, { y: 1240, s: t < 21.45 ? 0 : lerp(2.3, 1, inCubic(pr(t, 21.45, 0.2))) * (t > 21.65 ? squash(t, 21.65, 0.08, 3, 7) : 1), r: -4 + Math.sin((t - 22.2) * 3) * 1.5 * pr(t, 22.2, 0.4), o: outCubic(pr(t, 21.45, 0.2)) });
+  const ct = t - 19.75;
+  confetti.style.visibility = ct > 0 && ct < 2.4 ? "visible" : "hidden";
+  CONF.forEach((c) => { const dr = (1 - Math.exp(-2.2 * ct)) / 2.2, x = 540 + c.vx * dr, y = 880 + c.vy * dr + 700 * ct * ct;
+    setT(c.n, `translate(${x} ${y}) rotate(${c.spin * ct}) scale(${Math.cos(c.ph + ct * c.flip)} 1)`); c.n.setAttribute("opacity", 1 - cl((ct - 1.6) / 0.7)); });
+};
+
+// ───────── bruitages (rendus hors temps réel, volume réduit pour laisser place à la voix) ─────────
+window.renderAudio = async () => {
+  const SR = 48000, ctx = new OfflineAudioContext(2, SR * DUR, SR);
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4;
+  const master = ctx.createGain(); master.gain.value = 0.7; master.connect(comp); comp.connect(ctx.destination);
+  const noiseBuf = ctx.createBuffer(1, SR * 2, SR); const nd = noiseBuf.getChannelData(0); let s = 1; for (let i = 0; i < nd.length; i++) { s = (s * 16807) % 2147483647; nd[i] = (s / 2147483647) * 2 - 1; }
+  const pan = (p) => { const n = ctx.createStereoPanner(); n.pan.value = p; n.connect(master); return n; };
+  const env = (g, t, a, peak, d) => { g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
+  const tone = (t, f0, f1, d, vol = 0.4, type = "sine", p = 0) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + d); env(g, t, 0.005, vol, d); o.connect(g).connect(pan(p)); o.start(t); o.stop(t + d + 0.05); };
+  const noise = (t, d, f0, f1, vol = 0.3, q = 1.2, type = "bandpass", p = 0) => { const sN = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); sN.buffer = noiseBuf; f.type = type; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + d * 0.45); g.gain.linearRampToValueAtTime(0, t + d); sN.connect(f).connect(g).connect(pan(p)); sN.start(t); sN.stop(t + d); };
+  const popS = (t, f = 520, v = 0.3, p = 0) => tone(t, f * 1.8, f, 0.09, v, "sine", p);
+  const whoosh = (t, d = 0.55) => noise(t - 0.12, d, 300, 3500, 0.3);
+  const thud = (t, v = 0.7) => { tone(t, 160, 45, 0.25, v); noise(t, 0.08, 1200, 300, 0.2, 0.8, "lowpass"); };
+  const chord = (t, freqs, d, vol) => freqs.forEach((f, k) => { tone(t, f, f, d, vol, "triangle", (k - 1) * 0.25); tone(t, f * 2, f * 2, d * 0.6, vol * 0.25, "sine"); });
+  // 1
+  [[-0.05, 480], [1.35, 560], [1.9, 660]].forEach(([t, f]) => popS(Math.max(0, t), f, 0.22)); noise(0.5, 0.45, 600, 1800, 0.12); popS(1.0, 900, 0.12);
+  // 2 — cartons, croix, nuage
+  whoosh(2.8); [2.95, 3.05, 3.15].forEach((a, i) => thud(a + 0.25, 0.35)); popS(3.05, 520, 0.18);
+  noise(3.55, 0.18, 3000, 1500, 0.2, 0.7, "highpass", -0.3); noise(3.7, 0.18, 3000, 1500, 0.2, 0.7, "highpass", 0.3);
+  noise(4.0, 0.5, 2500, 300, 0.35, 0.6, "lowpass"); thud(4.0, 0.5); thud(4.5, 0.7);
+  // 3 — principe
+  whoosh(5.8); popS(6.3, 520, 0.18); popS(7.1, 600, 0.18);
+  [8.3, 9.2, 10.2].forEach((t, i) => { popS(t, 560 + i * 80, 0.2); tone(t + 0.05, 880 * [1, 1.26, 1.5][i], 880 * [1, 1.26, 1.5][i], 0.3, 0.1, "triangle"); });
+  popS(11.3, 700, 0.22); for (let i = 0; i < 5; i++) { tone(11.4 + i * 0.07, 2093, 2093, 0.25, 0.06, "triangle", (i - 2) / 3); tone(11.43 + i * 0.07, 2637, 2637, 0.3, 0.05, "triangle", (i - 2) / 3); }
+  // 4 — cadeau
+  whoosh(12.8); noise(13.0, 0.35, 2500, 500, 0.15); thud(13.35, 0.6);
+  noise(13.35, 0.25, 800, 4000, 0.15); chord(13.4, [1047, 1319, 1568], 1.0, 0.08); popS(13.3, 560, 0.18); thud(14.05, 0.6);
+  [15.0, 16.1, 17.3].forEach((t, i) => { popS(t, 620 + i * 60, 0.18); tone(t + 0.15, 1320 + i * 120, 1760 + i * 120, 0.12, 0.08, "triangle"); });
+  // 5 — appel à l'action
+  whoosh(19.0); popS(19.15, 420, 0.25); noise(19.3, 0.3, 500, 2500, 0.15); thud(19.6, 0.6); popS(19.25, 520, 0.18);
+  chord(19.75, [784, 988], 0.16, 0.08); chord(19.93, [1047, 1319, 1568], 1.2, 0.07); popS(20.0, 760, 0.18);
+  noise(20.7, 0.35, 1500, 3500, 0.1, 1, "bandpass", 0.5); thud(21.65, 0.8);
+  const buf = await ctx.startRendering();
+  const n = buf.length, out = new DataView(new ArrayBuffer(44 + n * 4)), L = buf.getChannelData(0), R = buf.getChannelData(1);
+  const ws = (o, str) => [...str].forEach((c, i) => out.setUint8(o + i, c.charCodeAt(0)));
+  ws(0, "RIFF"); out.setUint32(4, 36 + n * 4, true); ws(8, "WAVEfmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
+  out.setUint32(24, SR, true); out.setUint32(28, SR * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true); ws(36, "data"); out.setUint32(40, n * 4, true);
+  for (let i = 0; i < n; i++) { out.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i])) * 32767, true); out.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i])) * 32767, true); }
+  const bytes = new Uint8Array(out.buffer); let bin = ""; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+};
+
+window.ready = Promise.all([document.fonts.load("700 100px Fredoka"), document.fonts.load("600 100px Fredoka")]).then(() => document.fonts.ready).then(() => window.seek(0));
+</script>
+</body>
+</html>
