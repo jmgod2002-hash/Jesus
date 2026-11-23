@@ -12,6 +12,7 @@
   body { background: #111; }
   #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: "Fredoka", sans-serif; font-weight: 700; }
   .layer, .content { position: absolute; inset: 0; }
+  .content { transform-origin: 540px 960px; }
   .wipe { position: absolute; border-radius: 50%; }
   .a { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }
   .txt { color: #fff; line-height: 1; letter-spacing: -0.01em; }
@@ -24,26 +25,31 @@
 <div id="stage"></div>
 <script>
 // ───────── outils ─────────
-const W = 1080, H = 1920, DUR = 16;
+const W = 1080, H = 1920, DUR = 20;
 const cl = (x) => Math.max(0, Math.min(1, x));
 const pr = (t, a, d) => cl((t - a) / d);
 const outCubic = (x) => 1 - Math.pow(1 - x, 3);
+const outQuint = (x) => 1 - Math.pow(1 - x, 5);
 const inCubic = (x) => x * x * x;
 const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 const outBack = (x, s = 1.7) => 1 + (s + 1) * Math.pow(x - 1, 3) + s * Math.pow(x - 1, 2);
 const lerp = (a, b, x) => a + (b - a) * x;
-const pop = (t, a, d = 0.4) => outBack(pr(t, a, d));
-// suite de clés [temps, valeur] avec interpolation adoucie
+// ressort amorti : 0 → 1 avec un léger dépassement, mouvement organique
+const spring = (t, a, f = 1.8, d = 8) => { const x = t - a; return x <= 0 ? 0 : 1 - Math.exp(-d * x) * Math.cos(2 * Math.PI * f * x); };
+// écrasement à l'atterrissage (1 au repos)
+const squash = (t, a, amp = 0.22, f = 2.6, d = 7) => { const x = t - a; return x <= 0 ? 1 : 1 - amp * Math.exp(-d * x) * Math.cos(2 * Math.PI * f * x); };
 const keys = (t, ks, ease = inOut) => { if (t <= ks[0][0]) return ks[0][1]; for (let i = 1; i < ks.length; i++) if (t <= ks[i][0]) return lerp(ks[i - 1][1], ks[i][1], ease((t - ks[i - 1][0]) / (ks[i][0] - ks[i - 1][0]))); return ks[ks.length - 1][1]; };
 let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
 const stage = document.getElementById("stage");
 const el = (html, parent = stage) => { const d = document.createElement("div"); d.innerHTML = html.trim(); const n = d.firstChild; parent.appendChild(n); return n; };
-// place un élément par son centre
-const place = (n, { x = 540, y = 960, s = 1, sx = 1, sy = 1, r = 0, o = 1 } = {}) => {
+// place un élément par son centre ; org = point fixe des échelles (ex. "50% 100%" = pied)
+const place = (n, { x = 540, y = 960, s = 1, sx = 1, sy = 1, r = 0, o = 1, org } = {}) => {
+  if (org) n.style.transformOrigin = org;
   n.style.transform = `translate(${x}px,${y}px) translate(-50%,-50%) rotate(${r}deg) scale(${s * sx},${s * sy})`;
-  n.style.opacity = o; n.style.visibility = o <= 0.001 || s * sx * sy === 0 ? "hidden" : "visible";
+  n.style.opacity = o; n.style.visibility = o <= 0.001 || Math.abs(s * sx * sy) < 0.001 ? "hidden" : "visible";
 };
+const setT = (n, tr) => n.setAttribute("transform", tr);
 
 // ───────── mascotte (le T à l'œil) ─────────
 const T = window.T_PATH; let mid = 0;
@@ -54,24 +60,28 @@ function mascot(parent, width) {
     <path d="${T}" fill="#fe6132"/>
     <g clip-path="url(#${id}t)"><g class="lid"><ellipse cx="382" cy="418" rx="82" ry="122" transform="rotate(3 382 418)" fill="#fff"/>
     <g clip-path="url(#${id}e)"><circle class="pupil" cx="444" cy="458" r="50" fill="#fe6132"/></g></g></g></svg></div>`, parent);
-  n.eye = (open, dx = 0, dy = 0) => { n.querySelector(".lid").setAttribute("transform", `translate(382 430) scale(1 ${Math.max(0.06, open)}) translate(-382 -430)`); n.querySelector(".pupil").setAttribute("transform", `translate(${dx} ${dy})`); };
+  n.eye = (open, dx = 0, dy = 0) => { setT(n.querySelector(".lid"), `translate(382 430) scale(1 ${Math.max(0.06, open)}) translate(-382 -430)`); setT(n.querySelector(".pupil"), `translate(${dx} ${dy})`); };
   return n;
 }
-const blink = (t, at) => (t > at && t < at + 0.16 ? 0.06 : 1);
+// clignement doux (fermeture/ouverture en 0,18 s)
+const blink = (t, at) => { const x = (t - at) / 0.18; return x <= 0 || x >= 1 ? 1 : 0.06 + 0.94 * Math.abs(Math.cos(Math.PI * x)); };
 
-// ───────── couches (chaque scène a son fond qui s'ouvre en cercle) ─────────
+// ───────── couches : chaque scène ouvre son fond en cercle, précédé d'un anneau clair ─────────
 const SCENES = [
   { start: 0, color: "var(--violet)", from: [540, 960] },
-  { start: 2.4, color: "var(--orange)", from: [540, 1500] },
-  { start: 4.8, color: "var(--creme)", from: [880, 260] },
-  { start: 9.8, color: "var(--violet)", from: [160, 1650] },
-  { start: 12.4, color: "var(--orange)", from: [540, 700] },
+  { start: 2.8, color: "var(--orange)", from: [540, 1500], ring: "rgba(255,255,255,.35)" },
+  { start: 6.0, color: "var(--creme)", from: [880, 260], ring: "var(--orange)" },
+  { start: 12.2, color: "var(--violet)", from: [160, 1650], ring: "rgba(255,243,230,.5)" },
+  { start: 15.4, color: "var(--orange)", from: [540, 700], ring: "rgba(255,255,255,.4)" },
 ];
-SCENES.forEach((sc) => {
+SCENES.forEach((sc, i) => {
   const R = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(x - sc.from[0], y - sc.from[1]))) + 10;
+  const circ = (bg) => `<div class="wipe" style="width:${2 * R}px;height:${2 * R}px;left:${sc.from[0] - R}px;top:${sc.from[1] - R}px;background:${bg}"></div>`;
   sc.layer = el(`<div class="layer"></div>`);
-  sc.wipe = el(`<div class="wipe" style="width:${2 * R}px;height:${2 * R}px;left:${sc.from[0] - R}px;top:${sc.from[1] - R}px;background:${sc.color}"></div>`, sc.layer);
+  if (sc.ring) sc.ringEl = el(circ(sc.ring), sc.layer);
+  sc.wipe = el(circ(sc.color), sc.layer);
   sc.c = el(`<div class="content"></div>`, sc.layer);
+  sc.end = SCENES[i + 1] ? SCENES[i + 1].start : DUR;
 });
 const [S1, S2, S3, S4, S5] = SCENES.map((s) => s.c);
 
@@ -79,9 +89,10 @@ const [S1, S2, S3, S4, S5] = SCENES.map((s) => s.c);
 const deco = (parent, list, color) => list.map(([x, y, r]) => ({ x, y, r, n: el(`<div class="a blob" style="width:${2 * r}px;height:${2 * r}px;background:${color}"></div>`, parent) }));
 const decoV1 = deco(S1, [[120, 260, 90], [960, 520, 140], [170, 1500, 60], [900, 1650, 110]], "rgba(255,255,255,.07)");
 const decoO2 = deco(S2, [[150, 330, 120], [940, 1250, 170], [120, 1650, 70]], "rgba(255,255,255,.12)");
+const decoC3 = deco(S3, [[980, 1000, 120], [80, 1520, 90]], "rgba(254,97,50,.07)");
 const decoV4 = deco(S4, [[960, 180, 120], [110, 1520, 150], [990, 1600, 60]], "rgba(255,255,255,.07)");
 const decoO5 = deco(S5, [[130, 250, 110], [970, 1150, 150], [150, 1700, 90]], "rgba(255,255,255,.12)");
-const floatDeco = (arr, t) => arr.forEach((d, i) => place(d.n, { x: d.x + Math.sin(t * 0.9 + i * 2) * 18, y: d.y + Math.cos(t * 0.7 + i) * 24 }));
+const floatDeco = (arr, t) => arr.forEach((d, i) => place(d.n, { x: d.x + Math.sin(t * 0.9 + i * 2) * 22, y: d.y + Math.cos(t * 0.7 + i) * 28, s: 1 + 0.06 * Math.sin(t * 1.3 + i) }));
 
 // ───────── scène 1 : accroche ─────────
 const s1a = el(`<div class="a txt" style="font-size:104px">Tu veux des</div>`, S1);
@@ -95,19 +106,22 @@ const s2b = el(`<div class="a txt" style="font-size:124px">Trop loin ?</div>`, S
 const strike = (w) => el(`<div class="a" style="width:${w}px;height:22px"><div style="width:100%;height:100%;border-radius:11px;background:var(--nuit);transform-origin:left center"></div></div>`, S2);
 const s2sa = strike(900), s2sb = strike(640);
 const s2st = el(`<div class="a txt" style="font-size:128px;line-height:1.02;text-align:center;background:var(--violet);border-radius:56px;padding:40px 64px 52px;box-shadow:0 18px 0 var(--nuit)">On s'en<br>occupe !</div>`, S2);
+const ring2 = el(`<div class="a" style="width:700px;height:700px;border-radius:50%;border:16px solid rgba(255,255,255,.8)"></div>`, S2);
 
 // ───────── scène 3 : comment ça marche ─────────
 const s3t = el(`<div class="a txt" style="font-size:92px;color:var(--violet)">Comment ça marche ?</div>`, S3);
-const map = el(`<svg class="a" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0">
+const ROUTE = "M770 500 C 860 700, 400 540, 360 760";
+const map = el(`<svg class="a" width="1080" height="1920" viewBox="0 0 1080 1920">
   <defs><mask id="trail" maskUnits="userSpaceOnUse"><path id="trailMask" d="" fill="none" stroke="#fff" stroke-width="40" stroke-linecap="round"/></mask></defs>
-  <path id="route" d="M770 500 C 860 700, 400 540, 360 760" fill="none" stroke="none"/>
-  <path d="M770 500 C 860 700, 400 540, 360 760" fill="none" stroke="#fe6132" stroke-width="14" stroke-linecap="round" stroke-dasharray="1 30" mask="url(#trail)"/>
+  <path id="route" d="${ROUTE}" fill="none" stroke="none"/>
+  <path d="${ROUTE}" fill="none" stroke="#fe6132" stroke-width="14" stroke-linecap="round" stroke-dasharray="1 30" mask="url(#trail)"/>
 </svg>`, S3);
 const route = map.querySelector("#route"), routeLen = route.getTotalLength();
-const pin = (label, color) => el(`<div class="a" style="text-align:center">
-  <svg width="120" height="150" viewBox="0 0 120 150" style="margin:0 auto"><path d="M60 146 C 30 104, 6 82, 6 56 A54 54 0 0 1 114 56 C 114 82, 90 104, 60 146Z" fill="${color}"/><circle cx="60" cy="56" r="22" fill="#fff"/></svg>
-  <div class="txt pill" style="font-size:44px;background:var(--nuit);margin-top:10px;padding:10px 30px 14px">${label}</div></div>`, S3);
-const pinCN = pin("CHINE", "var(--orange)");
+const ROUTE_PTS = Array.from({ length: 241 }, (_, i) => route.getPointAtLength((i / 240) * routeLen));
+const routeAt = (u) => { const f = cl(u) * 240, i = Math.min(239, Math.floor(f)), k = f - i, a = ROUTE_PTS[i], b = ROUTE_PTS[i + 1]; return { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), ang: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI }; };
+const pinCN = el(`<div class="a"><svg width="120" height="150" viewBox="0 0 120 150"><path d="M60 146 C 30 104, 6 82, 6 56 A54 54 0 0 1 114 56 C 114 82, 90 104, 60 146Z" fill="#fe6132"/><circle cx="60" cy="56" r="22" fill="#fff"/></svg></div>`, S3);
+const labelCN = el(`<div class="a txt pill" style="font-size:44px;background:var(--nuit);padding:10px 30px 14px">CHINE</div>`, S3);
+const pinShadow = el(`<div class="a" style="width:90px;height:22px;border-radius:50%;background:rgba(43,26,74,.18)"></div>`, S3);
 const COAST = [[49.27,-11.95],[49.95,-13.3],[50.28,-14.9],[50.48,-15.4],[49.9,-15.6],[49.75,-16.5],[49.4,-18.15],[48.9,-19.6],[48.35,-21.23],[47.83,-22.82],[47.0,-25.03],[46.0,-25.3],[45.15,-25.6],[44.0,-24.8],[43.67,-23.35],[43.37,-21.75],[44.28,-20.28],[44.0,-18.06],[44.45,-16.2],[45.4,-15.9],[46.3,-15.7],[47.5,-14.6],[48.45,-13.6],[48.9,-12.8]];
 const islandPath = (() => { const k = 420 / 13.65, pts = COAST.map(([lo, la]) => [(lo - 46.8) * 0.945 * k, (-la - 18.78) * k]);
   let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`; const n = pts.length;
@@ -115,28 +129,47 @@ const islandPath = (() => { const k = 420 / 13.65, pts = COAST.map(([lo, la]) =>
     d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`; }
   return d + "Z"; })();
 const island = el(`<svg class="a" width="260" height="440" viewBox="-130 -220 260 440"><path d="${islandPath}" fill="#64429e"/></svg>`, S3);
+const ripple = el(`<div class="a" style="width:300px;height:300px;border-radius:50%;border:10px solid rgba(100,66,158,.35)"></div>`, S3);
 const labelMG = el(`<div class="a txt pill" style="font-size:44px;background:var(--nuit);padding:10px 30px 14px">MADAGASCAR</div>`, S3);
 const BOX = `<svg width="150" height="150" viewBox="0 0 100 100"><path d="M50 8 L90 26 L90 74 L50 92 L10 74 L10 26 Z" fill="#c98a4b"/><path d="M50 44 L90 26 L90 74 L50 92 Z" fill="#a86d34"/><path d="M10 26 L50 44 L90 26 L50 8 Z" fill="#e0a86a"/><path d="M30 17 L70 35 L70 50 L62 54 L62 39 L22 21 Z" fill="#fe6132"/></svg>`;
 const box = el(`<div class="a">${BOX}</div>`, S3);
 const plane = el(`<div class="a"><svg width="170" height="170" viewBox="0 0 100 100"><path d="M92 50 C 92 45, 86 43, 80 43 L60 43 L38 12 L28 12 L40 43 L20 43 L12 32 L5 32 L10 50 L5 68 L12 68 L20 57 L40 57 L28 88 L38 88 L60 57 L80 57 C 86 57, 92 55, 92 50 Z" fill="#64429e"/></svg></div>`, S3);
+const puffs = Array.from({ length: 7 }, () => el(`<div class="a blob" style="width:44px;height:44px;background:rgba(100,66,158,.22)"></div>`, S3));
 const burst = el(`<svg class="a" width="300" height="300" viewBox="-150 -150 300 300">${Array.from({ length: 8 }, (_, i) => `<line x1="0" y1="-80" x2="0" y2="-120" stroke="#fe6132" stroke-width="12" stroke-linecap="round" transform="rotate(${i * 45})"/>`).join("")}</svg>`, S3);
-const step = (n, label) => el(`<div class="a" style="display:flex;align-items:center;gap:30px;width:860px">
-  <div class="txt" style="flex:none;width:104px;height:104px;border-radius:50%;background:var(--orange);font-size:62px;display:flex;align-items:center;justify-content:center;padding-bottom:6px">${n}</div>
-  <div class="txt" style="font-size:58px;color:var(--nuit)">${label}</div></div>`, S3);
+const step = (n, label) => { const s = el(`<div class="a" style="display:flex;align-items:center;gap:30px;width:860px">
+  <div class="num txt" style="flex:none;width:104px;height:104px;border-radius:50%;background:var(--orange);font-size:62px;display:flex;align-items:center;justify-content:center;padding-bottom:6px">${n}</div>
+  <div class="lab txt" style="font-size:58px;color:var(--nuit)">${label}</div></div>`, S3); s.num = s.querySelector(".num"); s.lab = s.querySelector(".lab"); return s; };
 const steps = [step(1, "Tu choisis ton article"), step(2, "On l'achète en Chine"), step(3, "Tu reçois à Madagascar")];
 
-// ───────── scène 4 : catégories ─────────
+// ───────── scène 4 : catégories, chaque icône a sa propre animation ─────────
 const s4a = el(`<div class="a txt" style="font-size:104px">Mode • Tech</div>`, S4);
 const s4b = el(`<div class="a txt" style="font-size:104px">Maison • Beauté</div>`, S4);
+const NOTE = `<circle cx="0" cy="0" r="4.5" fill="#64429e"/><path d="M3.8 0 V-15 L11 -12" stroke="#64429e" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+const STEAM = `<path d="M0 0 c -5 -5, 5 -9, 0 -14 c -5 -5, 5 -9, 0 -14" stroke="#b9a3dd" stroke-width="3.6" fill="none" stroke-linecap="round"/>`;
 const ICONS = [
-  `<path d="M30 15 L40 12 Q50 24 60 12 L70 15 L92 32 L81 47 L72 41 L72 88 L28 88 L28 41 L19 47 L8 32 Z" fill="#64429e"/>`,
-  `<path d="M33 40 V30 a17 17 0 0 1 34 0 V40" stroke="#64429e" stroke-width="8" fill="none"/><rect x="14" y="38" width="72" height="52" rx="12" fill="#fe6132"/><rect x="42" y="52" width="16" height="10" rx="3" fill="#64429e"/>`,
-  `<rect x="27" y="6" width="46" height="88" rx="11" fill="#64429e"/><rect x="32" y="16" width="36" height="64" rx="4" fill="#ffd9cc"/><circle cx="50" cy="87" r="3.5" fill="#fff"/><circle cx="50" cy="48" r="10" fill="#fe6132"/>`,
-  `<path d="M20 62 V50 a30 30 0 0 1 60 0 V62" stroke="#64429e" stroke-width="9" fill="none"/><rect x="10" y="52" width="24" height="36" rx="10" fill="#fe6132"/><rect x="66" y="52" width="24" height="36" rx="10" fill="#fe6132"/>`,
-  `<rect x="44" y="22" width="12" height="10" rx="3" fill="#64429e"/><rect x="12" y="32" width="76" height="12" rx="6" fill="#64429e"/><rect x="18" y="44" width="64" height="40" rx="10" fill="#fe6132"/><rect x="4" y="52" width="16" height="8" rx="4" fill="#64429e"/><rect x="80" y="52" width="16" height="8" rx="4" fill="#64429e"/>`,
-  `<path d="M40 43 V24 L60 12 V43 Z" fill="#fe6132"/><rect x="37" y="41" width="26" height="16" rx="3" fill="#f3b04a"/><rect x="33" y="55" width="34" height="38" rx="5" fill="#64429e"/>`,
+  { svg: `<g class="g"><path d="M50 15 V8 a5 5 0 1 0 -5 -5" stroke="#2b1a4a" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M30 15 L40 12 Q50 24 60 12 L70 15 L92 32 L81 47 L72 41 L72 88 L28 88 L28 41 L19 47 L8 32 Z" fill="#64429e"/><path d="M40 52 h20" stroke="#fe6132" stroke-width="6" stroke-linecap="round"/></g>`,
+    anim: (q, lt) => setT(q.g, `rotate(${16 * Math.exp(-1.6 * lt) * Math.sin(7 * lt) + 4 * Math.sin(2.2 * lt)} 50 3)`) },
+  { svg: `<g class="g"><g class="h"><path d="M33 40 V30 a17 17 0 0 1 34 0 V40" stroke="#64429e" stroke-width="8" fill="none"/></g><rect x="14" y="38" width="72" height="52" rx="12" fill="#fe6132"/><rect x="42" y="52" width="16" height="10" rx="3" fill="#64429e"/></g>`,
+    anim: (q, lt) => { const ph = (lt % 1.3) / 1.3, hop = ph < 0.4 ? Math.sin((ph / 0.4) * Math.PI) : 0, land = ph >= 0.4 ? squash(ph * 1.3, 0.52, 0.12, 3, 9) : 1 - 0.06 * hop;
+      setT(q.g, `translate(0 ${-14 * hop}) translate(50 90) scale(${2 - land} ${land}) translate(-50 -90)`); setT(q.h, `rotate(${-10 * hop} 50 40)`); } },
+  { svg: `<g class="g"><rect x="27" y="6" width="46" height="88" rx="11" fill="#64429e"/><rect x="32" y="16" width="36" height="64" rx="4" fill="#ffd9cc"/><circle cx="50" cy="87" r="3.5" fill="#fff"/><path class="c" d="M50 58 C 36 48, 38 36, 50 43 C 62 36, 64 48, 50 58Z" fill="#fe6132"/><g class="b"><circle cx="72" cy="10" r="10" fill="#fe6132" stroke="#fff3e6" stroke-width="3"/><text x="72" y="14.5" font-size="13" font-family="Fredoka" font-weight="700" fill="#fff" text-anchor="middle">1</text></g></g>`,
+    anim: (q, lt) => { const ph = lt % 1.6, buzz = ph < 0.35 ? Math.sin(ph * 90) * 7 * (1 - ph / 0.35) : 0;
+      setT(q.g, `rotate(${buzz} 50 50)`); const beat = 1 + 0.18 * Math.pow(Math.max(0, Math.sin(lt * 2 * Math.PI * 1.25)), 6);
+      setT(q.c, `translate(50 48) scale(${beat}) translate(-50 -48)`); const b = spring(lt, 0.25, 2, 9); setT(q.b, `translate(72 10) scale(${b}) translate(-72 -10)`); } },
+  { svg: `<g class="g"><path d="M20 62 V50 a30 30 0 0 1 60 0 V62" stroke="#64429e" stroke-width="9" fill="none"/><g class="l"><rect x="10" y="52" width="24" height="36" rx="10" fill="#fe6132"/></g><g class="r"><rect x="66" y="52" width="24" height="36" rx="10" fill="#fe6132"/></g></g><g class="n1">${NOTE}</g><g class="n2">${NOTE}</g>`,
+    anim: (q, lt) => { const beat = 1 + 0.12 * Math.pow(Math.max(0, Math.sin(lt * 2 * Math.PI * 1.6)), 8);
+      setT(q.l, `translate(22 70) scale(${beat}) translate(-22 -70)`); setT(q.r, `translate(78 70) scale(${beat}) translate(-78 -70)`); setT(q.g, `rotate(${3 * Math.sin(lt * 2 * Math.PI * 0.8)} 50 60)`);
+      [q.n1, q.n2].forEach((n, i) => { const u = ((lt * 0.75 + i * 0.5) % 1); setT(n, `translate(${(i ? 84 : 16) + Math.sin(u * 9) * 4} ${46 - u * 44}) scale(${0.6 + 0.5 * u})`); n.setAttribute("opacity", Math.sin(u * Math.PI)); }); } },
+  { svg: `<g class="s1" transform="translate(36 28)">${STEAM}</g><g class="s2">${STEAM}</g><g class="s3">${STEAM}</g><g class="g"><rect x="18" y="44" width="64" height="40" rx="10" fill="#fe6132"/><rect x="4" y="52" width="16" height="8" rx="4" fill="#64429e"/><rect x="80" y="52" width="16" height="8" rx="4" fill="#64429e"/><g class="lid"><rect x="44" y="22" width="12" height="10" rx="3" fill="#64429e"/><rect x="12" y="32" width="76" height="12" rx="6" fill="#64429e"/></g></g>`,
+    anim: (q, lt) => { const ph = (lt % 1.5) / 1.5, lift = ph < 0.3 ? Math.sin((ph / 0.3) * Math.PI) : 0;
+      setT(q.lid, `translate(0 ${-9 * lift}) rotate(${-8 * lift} 18 44)`);
+      [q.s1, q.s2, q.s3].forEach((n, i) => { const u = ((lt * 0.6 + i * 0.33) % 1); setT(n, `translate(${[34, 50, 66][i]} ${28 - u * 26})`); n.setAttribute("opacity", Math.sin(u * Math.PI) * 0.9); }); } },
+  { svg: `<g class="g"><g class="bul"><path d="M40 43 V24 L60 12 V43 Z" fill="#fe6132"/></g><rect x="37" y="41" width="26" height="16" rx="3" fill="#f3b04a"/><rect x="33" y="55" width="34" height="38" rx="5" fill="#64429e"/></g><g class="sp"><path d="M0 -8 L2.4 -2.4 L8 0 L2.4 2.4 L0 8 L-2.4 2.4 L-8 0 L-2.4 -2.4Z" fill="#ffd23f"/></g>`,
+    anim: (q, lt) => { const up = spring(lt, 0.15, 1.6, 7); setT(q.bul, `translate(0 ${lerp(26, 0, up) + 2 * Math.sin(lt * 3)})`); setT(q.g, `rotate(${4 * Math.sin(lt * 2.4)} 50 93)`);
+      const tw = Math.pow(Math.max(0, Math.sin(lt * 2 * Math.PI * 0.9)), 3); setT(q.sp, `translate(70 14) scale(${tw}) rotate(${lt * 90})`); } },
 ];
-const cards = ICONS.map((ic) => el(`<div class="a" style="width:270px;height:270px;border-radius:56px;background:var(--creme);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 0 rgba(0,0,0,.18)"><svg width="170" height="170" viewBox="0 0 100 100">${ic}</svg></div>`, S4));
+const cards = ICONS.map((ic) => { const c = el(`<div class="a" style="width:270px;height:270px;border-radius:56px;background:var(--creme);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 0 rgba(0,0,0,.18)"><svg width="170" height="170" viewBox="0 0 100 100">${ic.svg}</svg></div>`, S4);
+  c.q = {}; c.querySelectorAll("[class]").forEach((n) => (c.q[n.getAttribute("class")] = n)); c.anim = ic.anim; return c; });
 const s4c = el(`<div class="a txt pill" style="font-size:80px;background:var(--orange)">…et bien plus !</div>`, S4);
 
 // ───────── scène 5 : Tadaa ─────────
@@ -147,13 +180,14 @@ const logo = el(`<div class="a"><svg width="640" height="640" viewBox="0 0 1254 
   <g clip-path="url(#ld)"><g id="lT"><path d="${T}" fill="#fe6132"/><g clip-path="url(#lt)"><g id="lLid">
   <ellipse cx="382" cy="418" rx="82" ry="122" transform="rotate(3 382 418)" fill="#fff"/><g clip-path="url(#le)"><circle id="lPupil" cx="444" cy="458" r="50" fill="#fe6132"/></g></g></g></g></g></svg></div>`, S5);
 const lT = logo.querySelector("#lT"), lLid = logo.querySelector("#lLid"), lPupil = logo.querySelector("#lPupil");
-const confetti = el(`<svg class="a" width="1080" height="1920" viewBox="0 0 1080 1920" style="left:0;top:0"></svg>`, S5);
-const CONF = Array.from({ length: 46 }, (_, i) => {
-  const a = -Math.PI / 2 + (rnd() - 0.5) * 2.6, v = 900 + rnd() * 900, col = ["#64429e", "#fff", "#ffd23f", "#2b1a4a", "#fff3e6"][i % 5];
+const shine = el(`<div class="a" style="width:760px;height:760px;border-radius:50%;border:14px solid rgba(255,255,255,.7)"></div>`, S5);
+const confetti = el(`<svg class="a" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>`, S5);
+const CONF = Array.from({ length: 56 }, (_, i) => {
+  const a = -Math.PI / 2 + (rnd() - 0.5) * 2.8, v = 800 + rnd() * 1000, col = ["#64429e", "#fff", "#ffd23f", "#2b1a4a", "#fff3e6"][i % 5];
   const n = document.createElementNS("http://www.w3.org/2000/svg", i % 3 ? "rect" : "circle");
   if (i % 3) { n.setAttribute("width", 18 + rnd() * 14); n.setAttribute("height", 30 + rnd() * 16); n.setAttribute("x", -14); n.setAttribute("y", -20); } else n.setAttribute("r", 11 + rnd() * 7);
   n.setAttribute("fill", col); confetti.appendChild(n);
-  return { n, vx: Math.cos(a) * v, vy: Math.sin(a) * v, spin: (rnd() - 0.5) * 900 };
+  return { n, vx: Math.cos(a) * v, vy: Math.sin(a) * v, spin: (rnd() - 0.5) * 900, flip: 4 + rnd() * 6, ph: rnd() * 6 };
 });
 const letters = [..."Tadaa"].map((c) => el(`<div class="a txt" style="font-size:250px;text-shadow:0 16px 0 var(--violet)">${c}</div>`, S5));
 const LX = [215, 385, 545, 710, 870];
@@ -163,107 +197,140 @@ const s5c = el(`<div class="a txt pill" style="font-size:56px;background:#fff;co
 // ───────── l'image à l'instant t ─────────
 window.seek = (t) => {
   SCENES.forEach((sc, i) => {
-    const next = SCENES[i + 1], visible = t >= sc.start && (!next || t < next.start + 0.6);
+    const next = SCENES[i + 1], visible = t >= sc.start - 0.1 && (!next || t < next.start + 0.65);
     sc.layer.style.display = visible ? "block" : "none";
-    const k = i === 0 ? 1 : inOut(pr(t, sc.start, 0.55));
-    sc.wipe.style.transform = `scale(${k})`;
-    sc.c.style.opacity = i === 0 ? 1 : pr(t, sc.start + 0.12, 0.2);
+    if (!visible) return;
+    if (i > 0) { sc.wipe.style.transform = `scale(${inOut(pr(t, sc.start, 0.6))})`; sc.ringEl.style.transform = `scale(${inOut(pr(t, sc.start - 0.08, 0.6))})`; }
+    // caméra : légère avancée continue, entrée douce, sortie en zoom
+    const inK = i === 0 ? 1 : outCubic(pr(t, sc.start + 0.1, 0.5)), outK = next ? inCubic(pr(t, next.start, 0.5)) : 0;
+    const z = (0.94 + 0.06 * inK) * (1 + 0.025 * pr(t, sc.start, sc.end - sc.start)) * (1 + 0.12 * outK);
+    const shake = i === 1 && t > 4.55 && t < 4.95 ? Math.sin(t * 95) * 16 * Math.exp(-(t - 4.55) * 9) : 0;
+    sc.c.style.transform = `translate(${shake}px, ${shake * 0.5}px) scale(${z})`;
+    sc.c.style.opacity = i === 0 ? 1 : Math.min(inK, 1 - outK);
   });
 
-  // 1 — accroche
+  // 1 — accroche (le premier mot est déjà en place dès la première image)
   floatDeco(decoV1, t);
-  place(s1a, { y: 470, s: pop(t, 0.1, 0.35), r: lerp(-8, 0, pr(t, 0.1, 0.35)) });
-  place(s1b, { y: 640, s: pop(t, 0.35, 0.4), r: lerp(6, 0, pr(t, 0.35, 0.4)) });
-  place(s1c, { y: 840, s: pop(t, 0.7, 0.45), r: lerp(-10, -3, pr(t, 0.7, 0.45)) + Math.sin(t * 5) * 1.2 * pr(t, 1.2, 0.3) });
-  place(m1, { y: lerp(2300, 1480, outBack(pr(t, 0.45, 0.55), 1.4)), r: 6 + Math.sin(t * 3) * 2 });
-  m1.eye(blink(t, 1.95) * (t < 1.05 ? 0.06 : lerp(0.06, 1, pr(t, 1.05, 0.12))), keys(t, [[1.2, 0], [1.4, -40]]), keys(t, [[1.2, 0], [1.4, -46]]));
+  place(s1a, { y: 470, s: spring(t, -0.12), r: -8 * (1 - outCubic(pr(t, -0.12, 0.45))) });
+  place(s1b, { y: 640, s: spring(t, 0.3), r: 6 * (1 - outCubic(pr(t, 0.3, 0.45))) });
+  place(s1c, { y: 840, s: spring(t, 0.65), r: lerp(-10, -3, outCubic(pr(t, 0.65, 0.5))) + Math.sin((t - 1.2) * 4) * 1.5 * pr(t, 1.2, 0.5) });
+  const rise = spring(t, 0.5, 1.4, 6.5);
+  place(m1, { y: lerp(2300, 1480, rise) + Math.sin(t * 2.2) * 8 * pr(t, 1.3, 0.5), r: 6 + Math.sin(t * 2.6) * 2.5, org: "50% 100%", sy: squash(t, 0.85, 0.1), sx: 2 - squash(t, 0.85, 0.1) });
+  const open1 = t < 1.1 ? 0.06 : lerp(0.06, 1, outBack(pr(t, 1.1, 0.2), 2.5));
+  m1.eye(open1 * blink(t, 2.2), keys(t, [[1.25, 0], [1.55, -40]]), keys(t, [[1.25, 0], [1.55, -46]]));
 
   // 2 — problème → on s'en occupe
   floatDeco(decoO2, t);
-  const shake = t > 3.95 && t < 4.2 ? Math.sin(t * 120) * 14 * (1 - pr(t, 3.95, 0.25)) : 0;
-  S2.style.transform = `translate(${shake}px, ${shake * 0.6}px)`;
-  place(s2a, { y: 520, s: pop(t, 2.6, 0.35), o: lerp(1, 0.55, pr(t, 3.4, 0.2)) });
-  place(s2b, { y: 700, s: pop(t, 2.95, 0.35), o: lerp(1, 0.55, pr(t, 3.55, 0.2)) });
-  place(s2sa, { y: 528, r: -3, o: t > 3.3 ? 1 : 0 }); s2sa.firstChild.style.transform = `scaleX(${outCubic(pr(t, 3.3, 0.18))})`;
-  place(s2sb, { y: 708, r: 3, o: t > 3.45 ? 1 : 0 }); s2sb.firstChild.style.transform = `scaleX(${outCubic(pr(t, 3.45, 0.18))})`;
-  const st = pr(t, 3.75, 0.2);
-  place(s2st, { y: 1010, s: t < 3.75 ? 0 : lerp(2.3, 1, inCubic(st)), r: -5, o: st });
+  place(s2a, { y: 520, s: spring(t, 3.0) * lerp(1, 0.92, outCubic(pr(t, 3.85, 0.3))), o: lerp(1, 0.5, pr(t, 3.85, 0.3)) });
+  place(s2b, { y: 700, s: spring(t, 3.4) * lerp(1, 0.92, outCubic(pr(t, 4.0, 0.3))), o: lerp(1, 0.5, pr(t, 4.0, 0.3)) });
+  place(s2sa, { y: 528, r: -3, o: t > 3.82 ? 1 : 0 }); s2sa.firstChild.style.transform = `scaleX(${outQuint(pr(t, 3.82, 0.28))})`;
+  place(s2sb, { y: 708, r: 3, o: t > 3.98 ? 1 : 0 }); s2sb.firstChild.style.transform = `scaleX(${outQuint(pr(t, 3.98, 0.28))})`;
+  const st = pr(t, 4.35, 0.2);
+  place(s2st, { y: 1010, s: t < 4.35 ? 0 : st < 1 ? lerp(2.4, 1, inCubic(st)) : squash(t, 4.55, 0.08, 3, 7), r: -5 + Math.sin((t - 4.8) * 3) * 1.5 * pr(t, 4.8, 0.5), o: outCubic(st) });
+  const rk = pr(t, 4.55, 0.6);
+  place(ring2, { y: 1010, s: lerp(0.6, 1.5, outCubic(rk)), o: t < 4.55 ? 0 : 1 - rk });
 
   // 3 — comment ça marche
-  place(s3t, { y: 220, s: pop(t, 5.0, 0.4) });
-  place(pinCN, { x: 770, y: 410, s: pop(t, 5.3, 0.4) });
-  place(island, { x: 330, y: 800, s: pop(t, 5.55, 0.45), r: lerp(-12, 0, pr(t, 5.55, 0.45)) });
-  place(labelMG, { x: 300, y: 1085, s: pop(t, 5.75, 0.35) });
-  const fly = inOut(pr(t, 7.0, 1.3));
-  const head = route.getPointAtLength(fly * routeLen);
-  let dpath = "M770 500"; for (let i = 1; i <= 40; i++) { const q = route.getPointAtLength((fly * i / 40) * routeLen); dpath += ` L${q.x.toFixed(1)} ${q.y.toFixed(1)}`; }
+  floatDeco(decoC3, t);
+  place(s3t, { y: 220, s: spring(t, 6.2) });
+  // épingle Chine : tombe, s'écrase au sol, ombre qui grandit
+  const pinY = t < 6.45 ? -200 : lerp(-200, 410, Math.min(1, inCubic(pr(t, 6.45, 0.32))));
+  const pinSq = squash(t, 6.77, 0.25, 2.8, 8);
+  place(pinCN, { x: 770, y: pinY, org: "50% 100%", sy: pinSq, sx: 2 - pinSq, o: t < 6.45 ? 0 : 1 });
+  place(pinShadow, { x: 770, y: 487, s: lerp(0.2, 1, pr(t, 6.45, 0.32)), o: t < 6.45 ? 0 : 1 });
+  place(labelCN, { x: 770, y: 525, s: spring(t, 6.85) });
+  place(island, { x: 330, y: 800, s: spring(t, 6.75, 1.6, 7), r: -12 * (1 - outCubic(pr(t, 6.75, 0.6))) + Math.sin(t * 1.4) * 1.2 });
+  place(labelMG, { x: 300, y: 1085, s: spring(t, 6.95) });
+  // vol : le colis rejoint l'avion, l'avion trace la route en grossissant puis se pose
+  const fly = inOut(pr(t, 8.5, 1.6)), head = routeAt(fly);
+  let dpath = "M770 500"; for (let i = 1; i <= 60; i++) { const q = routeAt(fly * i / 60); dpath += ` L${q.x.toFixed(1)} ${q.y.toFixed(1)}`; }
   map.querySelector("#trailMask").setAttribute("d", fly > 0 ? dpath : "M0 0");
-  const ahead = route.getPointAtLength(Math.min(routeLen, fly * routeLen + 4)), back = route.getPointAtLength(Math.max(0, fly * routeLen - 4));
-  const ang = Math.atan2(ahead.y - back.y, ahead.x - back.x) * 180 / Math.PI;
-  place(plane, { x: head.x, y: head.y, r: ang, s: t < 6.85 ? 0 : t < 8.3 ? pop(t, 6.85, 0.3) : 1 - pr(t, 8.3, 0.15) });
-  // colis : apparaît en Chine, embarque, atterrit à Madagascar
-  if (t < 8.4) place(box, { x: 790, y: 560, s: t < 7.0 ? pop(t, 6.35, 0.4) : 1 - pr(t, 7.0, 0.15), r: Math.sin(t * 6) * 4 });
-  else place(box, { x: 345, y: lerp(500, 800, outBack(pr(t, 8.4, 0.35), 2.2)), s: pop(t, 8.4, 0.3), r: lerp(-20, 0, pr(t, 8.4, 0.35)) });
-  const b = pr(t, 8.62, 0.4);
-  place(burst, { x: 345, y: 800, s: lerp(0.7, 1.4, outCubic(b)), o: t < 8.62 ? 0 : 1 - b });
-  [5.6, 6.35, 8.6].forEach((a, i) => { const k = outCubic(pr(t, a, 0.4)); place(steps[i], { x: 540 + lerp(-160, 0, k), y: 1240 + i * 128, o: k, s: 1 + 0.06 * Math.sin(Math.PI * pr(t, a + 0.25, 0.35)) }); });
+  const pS = t < 8.3 ? 0 : t < 10.1 ? spring(t, 8.3, 2, 9) * (1 + 0.28 * Math.sin(Math.PI * fly)) : 1 - outCubic(pr(t, 10.1, 0.2));
+  place(plane, { x: head.x, y: head.y + Math.sin(t * 9) * 4 * Math.sin(Math.PI * fly), r: head.ang + 10 * Math.sin(Math.PI * fly * 2), s: pS });
+  puffs.forEach((p, i) => { const u = fly - (i + 1) * 0.06, age = pr(t, 8.5 + (u > 0 ? u * 1.6 : 0), 0.6); const q = routeAt(u);
+    place(p, { x: q.x, y: q.y, s: u > 0 && t < 10.6 ? lerp(1, 0.2, age) * Math.min(1, fly * 6) : 0, o: lerp(1, 0, age) }); });
+  if (t < 8.4) place(box, { x: 905, y: 440, s: spring(t, 7.8), r: Math.sin(t * 5) * 4 });
+  else if (t < 8.75) { const k = inOut(pr(t, 8.4, 0.35)); place(box, { x: lerp(905, 770, k), y: lerp(440, 500, k), s: lerp(1, 0, k), r: lerp(0, 30, k) }); }
+  else { const dropK = inCubic(pr(t, 10.15, 0.25)), bs = squash(t, 10.4, 0.25, 2.6, 8);
+    place(box, { x: 345, y: lerp(480, 800, dropK), org: "50% 100%", s: t < 10.15 ? 0 : 1, sy: bs, sx: 2 - bs, r: lerp(-18, 0, dropK) }); }
+  const b = pr(t, 10.4, 0.45);
+  place(burst, { x: 345, y: 850, s: lerp(0.7, 1.5, outCubic(b)), o: t < 10.4 ? 0 : 1 - b });
+  const rp = pr(t, 10.4, 0.8);
+  place(ripple, { x: 345, y: 840, s: lerp(0.3, 1.4, outCubic(rp)), o: t < 10.4 ? 0 : 1 - rp });
+  [6.9, 7.8, 10.35].forEach((a, i) => { const k = outQuint(pr(t, a, 0.55));
+    place(steps[i], { x: 540 + lerp(-120, 0, k), y: 1240 + i * 128, o: outCubic(pr(t, a, 0.3)) });
+    const ns = spring(t, a, 1.8, 7); steps[i].num.style.transform = `scale(${ns}) rotate(${(1 - k) * -90}deg)`; });
 
   // 4 — catégories
   floatDeco(decoV4, t);
-  place(s4a, { y: 300, s: pop(t, 10.0, 0.4) });
-  place(s4b, { y: 420, s: pop(t, 10.15, 0.4) });
-  cards.forEach((c, i) => { const a = 10.35 + i * 0.1; place(c, { x: [235, 540, 845][i % 3], y: (i < 3 ? 690 : 1000) + Math.sin(t * 3 + i) * 8 * pr(t, a + 0.4, 0.3), s: pop(t, a, 0.4), r: lerp(i % 2 ? 14 : -14, 0, pr(t, a, 0.45)) + Math.sin(t * 2.4 + i * 1.3) * 2 }); });
-  place(s4c, { y: 1290, s: pop(t, 11.35, 0.4), r: -3 });
+  place(s4a, { y: 300, s: spring(t, 12.35) });
+  place(s4b, { y: 420, s: spring(t, 12.5) });
+  cards.forEach((c, i) => { const a = 12.65 + i * 0.09, fall = inCubic(pr(t, a, 0.28)), land = a + 0.28, cs = squash(t, land, 0.18, 2.6, 8);
+    const x = [235, 540, 845][i % 3], y = (i < 3 ? 690 : 1000);
+    place(c, { x, y: t < a ? -300 : lerp(y - 520, y, fall) + Math.sin(t * 2.6 + i) * 7 * pr(t, land + 0.4, 0.5), org: "50% 100%", sy: cs, sx: 2 - cs, o: t < a ? 0 : 1,
+      r: lerp(i % 2 ? 18 : -18, 0, outCubic(pr(t, a, 0.5))) + Math.sin(t * 2 + i * 1.3) * 1.8 * pr(t, land, 0.5) });
+    c.anim(c.q, Math.max(0, t - land)); });
+  place(s4c, { y: 1290, s: spring(t, 14.0), r: -3 + Math.sin((t - 14.4) * 3) * 1.5 * pr(t, 14.4, 0.4) });
 
   // 5 — Tadaa
   floatDeco(decoO5, t);
-  place(logo, { y: 650, s: t < 12.55 ? 0 : outBack(pr(t, 12.55, 0.45), 1.5), r: Math.sin(t * 2) * 1.5 * pr(t, 13.6, 0.4) });
-  const drop = inCubic(pr(t, 12.75, 0.3));
-  const sq = keys(t, [[13.05, 1], [13.13, 0.8], [13.28, 1.08], [13.4, 0.97], [13.5, 1]]);
-  lT.setAttribute("transform", `translate(0 ${lerp(-1250, 0, drop)}) translate(690 1060) scale(${2 - sq} ${t < 13.05 ? 1.06 : sq}) translate(-690 -1060)`);
-  const lidOpen = (t < 13.32 ? 0.06 : keys(t, [[13.32, 0.06], [13.42, 1.08], [13.5, 1]])) * blink(t, 15.1);
-  lLid.setAttribute("transform", `translate(382 430) scale(1 ${Math.max(0.06, lidOpen)}) translate(-382 -430)`);
-  lPupil.setAttribute("transform", `translate(${keys(t, [[13.7, 0], [13.9, -20], [14.6, -20], [14.8, 0]])} ${keys(t, [[13.7, 0], [13.9, 30], [14.6, 30], [14.8, 0]])})`);
-  letters.forEach((n, i) => { const a = 13.15 + i * 0.07, k = pr(t, a, 0.45); place(n, { x: LX[i], y: 1150 + lerp(-180, 0, outBack(k, 2)) + Math.sin(t * 6 - i * 0.9) * 10 * pr(t, 14.0, 0.4), s: t < a ? 0 : lerp(0.3, 1, outBack(k, 2.5)), r: lerp([-14, 10, -8, 12, -10][i], 0, outCubic(k)) }); });
-  const ct = t - 13.15;
-  confetti.style.visibility = ct > 0 && ct < 2 ? "visible" : "hidden";
-  CONF.forEach((c) => { const x = 540 + c.vx * ct * 0.8, y = 1120 + c.vy * ct * 0.8 + 1300 * ct * ct; c.n.setAttribute("transform", `translate(${x} ${y}) rotate(${c.spin * ct})`); c.n.setAttribute("opacity", 1 - cl((ct - 1.2) / 0.6)); });
-  place(s5t, { y: 1340 + lerp(40, 0, outCubic(pr(t, 13.75, 0.4))), o: pr(t, 13.75, 0.35) });
-  place(s5c, { y: 1470, s: pop(t, 14.2, 0.45) * (1 + 0.035 * Math.sin((t - 14.6) * 7) * pr(t, 14.6, 0.3)) });
+  place(logo, { y: 650, s: spring(t, 15.55, 1.6, 7), r: Math.sin((t - 16.6) * 2) * 1.6 * pr(t, 16.6, 0.5) });
+  const drop = inCubic(pr(t, 15.75, 0.3)), sq = squash(t, 16.05, 0.2, 2.6, 7);
+  setT(lT, `translate(0 ${lerp(-1250, 0, drop)}) translate(690 1060) scale(${t < 16.05 ? 0.95 : 2 - sq} ${t < 16.05 ? 1.08 : sq}) translate(-690 -1060)`);
+  const lidOpen = (t < 16.3 ? 0.06 : lerp(0.06, 1, outBack(pr(t, 16.3, 0.2), 2.5))) * blink(t, 18.6);
+  setT(lLid, `translate(382 430) scale(1 ${Math.max(0.06, lidOpen)}) translate(-382 -430)`);
+  setT(lPupil, `translate(${keys(t, [[16.7, 0], [16.95, -20], [17.8, -20], [18.05, 0]])} ${keys(t, [[16.7, 0], [16.95, 30], [17.8, 30], [18.05, 0]])})`);
+  const sh = pr(t, 16.05, 0.7);
+  place(shine, { y: 650, s: lerp(0.85, 1.35, outCubic(sh)), o: t < 16.05 ? 0 : 1 - sh });
+  letters.forEach((n, i) => { const a = 16.15 + i * 0.07, k = spring(t, a, 1.7, 7);
+    place(n, { x: LX[i], y: 1150 + (1 - k) * -160 + Math.sin(t * 5 - i * 0.9) * 10 * pr(t, 17.0, 0.6), s: t < a ? 0 : lerp(0.3, 1, k), r: [-14, 10, -8, 12, -10][i] * (1 - outCubic(pr(t, a, 0.5))) }); });
+  const ct = t - 16.15;
+  confetti.style.visibility = ct > 0 && ct < 2.4 ? "visible" : "hidden";
+  CONF.forEach((c) => { const drag = (1 - Math.exp(-2.2 * ct)) / 2.2, x = 540 + c.vx * drag, y = 1120 + c.vy * drag + 700 * ct * ct;
+    setT(c.n, `translate(${x} ${y}) rotate(${c.spin * ct}) scale(${Math.cos(c.ph + ct * c.flip)} 1)`); c.n.setAttribute("opacity", 1 - cl((ct - 1.6) / 0.7)); });
+  place(s5t, { y: 1340 + lerp(50, 0, outQuint(pr(t, 16.8, 0.5))), o: outCubic(pr(t, 16.8, 0.4)) });
+  place(s5c, { y: 1470, s: spring(t, 17.3) * (1 + 0.035 * Math.sin((t - 17.9) * 6) * pr(t, 17.9, 0.4)) });
 };
 
-// ───────── bruitages (rendus hors temps réel) ─────────
+// ───────── bruitages (rendus hors temps réel, volume réduit pour laisser place à la voix) ─────────
 window.renderAudio = async () => {
   const SR = 48000, ctx = new OfflineAudioContext(2, SR * DUR, SR);
-  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
-  const master = ctx.createGain(); master.gain.value = 0.9; master.connect(comp); comp.connect(ctx.destination);
-  const noiseBuf = ctx.createBuffer(1, SR * 2, SR); const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4;
+  const master = ctx.createGain(); master.gain.value = 0.7; master.connect(comp); comp.connect(ctx.destination);
+  const noiseBuf = ctx.createBuffer(1, SR * 2, SR); const nd = noiseBuf.getChannelData(0); let s = 1; for (let i = 0; i < nd.length; i++) { s = (s * 16807) % 2147483647; nd[i] = (s / 2147483647) * 2 - 1; }
+  const pan = (p) => { const n = ctx.createStereoPanner(); n.pan.value = p; n.connect(master); return n; };
   const env = (g, t, a, peak, d) => { g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); };
-  const tone = (t, f0, f1, d, vol = 0.4, type = "sine") => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + d); env(g, t, 0.005, vol, d); o.connect(g).connect(master); o.start(t); o.stop(t + d + 0.05); };
-  const noise = (t, d, f0, f1, vol = 0.3, q = 1.2, type = "bandpass") => { const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = noiseBuf; f.type = type; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + d * 0.45); g.gain.linearRampToValueAtTime(0, t + d); s.connect(f).connect(g).connect(master); s.start(t); s.stop(t + d); };
-  const popS = (t, f = 520, v = 0.35) => tone(t, f * 1.8, f, 0.09, v);
-  const whoosh = (t, d = 0.5) => noise(t - 0.1, d, 300, 3500, 0.35);
-  const thud = (t, v = 0.8) => { tone(t, 160, 45, 0.25, v); noise(t, 0.08, 1200, 300, 0.25, 0.8, "lowpass"); };
+  const tone = (t, f0, f1, d, vol = 0.4, type = "sine", p = 0) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + d); env(g, t, 0.005, vol, d); o.connect(g).connect(pan(p)); o.start(t); o.stop(t + d + 0.05); };
+  const noise = (t, d, f0, f1, vol = 0.3, q = 1.2, type = "bandpass", p = 0) => { const sN = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); sN.buffer = noiseBuf; f.type = type; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + d * 0.45); g.gain.linearRampToValueAtTime(0, t + d); sN.connect(f).connect(g).connect(pan(p)); sN.start(t); sN.stop(t + d); };
+  const popS = (t, f = 520, v = 0.3, p = 0) => tone(t, f * 1.8, f, 0.09, v, "sine", p);
+  const whoosh = (t, d = 0.55) => noise(t - 0.12, d, 300, 3500, 0.3);
+  const thud = (t, v = 0.7) => { tone(t, 160, 45, 0.25, v); noise(t, 0.08, 1200, 300, 0.2, 0.8, "lowpass"); };
   // 1
-  [[0.1, 480], [0.35, 560], [0.7, 660]].forEach(([t, f]) => popS(t, f)); noise(0.45, 0.4, 600, 1800, 0.18); popS(1.05, 900, 0.18);
+  [[-0.05, 480], [0.3, 560], [0.65, 660]].forEach(([t, f]) => popS(Math.max(0, t), f)); noise(0.5, 0.45, 600, 1800, 0.15); popS(1.1, 900, 0.15);
   // 2
-  whoosh(2.4); popS(2.6, 520); popS(2.95, 600); noise(3.3, 0.16, 3000, 1500, 0.28, 0.7, "highpass"); noise(3.45, 0.16, 3000, 1500, 0.28, 0.7, "highpass"); thud(3.95, 1); popS(4.1, 700, 0.2);
+  whoosh(2.8); popS(3.0, 520); popS(3.4, 600); noise(3.82, 0.2, 3000, 1500, 0.22, 0.7, "highpass", -0.3); noise(3.98, 0.2, 3000, 1500, 0.22, 0.7, "highpass", 0.3); thud(4.55, 0.9);
   // 3
-  whoosh(4.8); popS(5.0, 520); popS(5.3, 620); popS(5.55, 560); popS(5.75, 700, 0.2);
-  [5.6, 6.35, 8.6].forEach((t, i) => tone(t, 880 * [1, 1.26, 1.5][i], 880 * [1, 1.26, 1.5][i], 0.25, 0.16, "triangle"));
-  popS(6.35, 460); noise(6.95, 1.45, 250, 1400, 0.3, 0.9); thud(8.55, 0.7);
+  whoosh(6.0); popS(6.2, 520); noise(6.45, 0.32, 2500, 600, 0.12); thud(6.77, 0.45); popS(6.85, 700, 0.2, 0.4); popS(6.75, 560, 0.25, -0.4); popS(6.95, 640, 0.18, -0.4);
+  [6.9, 7.8, 10.35].forEach((t, i) => tone(t, 880 * [1, 1.26, 1.5][i], 880 * [1, 1.26, 1.5][i], 0.3, 0.13, "triangle"));
+  popS(7.8, 460, 0.3, 0.4); noise(8.4, 0.3, 800, 2500, 0.12, 1, "bandpass", 0.4);
+  { const sN = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner(); sN.buffer = noiseBuf; sN.loop = true; f.type = "bandpass"; f.Q.value = 0.9;
+    f.frequency.setValueAtTime(300, 8.4); f.frequency.linearRampToValueAtTime(1400, 9.3); f.frequency.linearRampToValueAtTime(400, 10.1);
+    g.gain.setValueAtTime(0, 8.4); g.gain.linearRampToValueAtTime(0.28, 9.2); g.gain.linearRampToValueAtTime(0, 10.15);
+    p.pan.setValueAtTime(0.5, 8.4); p.pan.linearRampToValueAtTime(-0.5, 10.1); sN.connect(f).connect(g).connect(p).connect(master); sN.start(8.4); sN.stop(10.2); }
+  thud(10.4, 0.6); popS(10.42, 820, 0.12, -0.4);
   // 4
-  whoosh(9.8); popS(10.0, 540); popS(10.15, 600); for (let i = 0; i < 6; i++) popS(10.35 + i * 0.1, 500 + i * 70, 0.25); popS(11.35, 760);
+  whoosh(12.2); popS(12.35, 540); popS(12.5, 600);
+  for (let i = 0; i < 6; i++) { const t = 12.65 + i * 0.09 + 0.28; tone(t, 220 + i * 25, 90, 0.12, 0.3, "sine", [-0.4, 0, 0.4][i % 3]); popS(t, 600 + i * 70, 0.12, [-0.4, 0, 0.4][i % 3]); }
+  popS(14.0, 760);
   // 5 — « ta-daa »
-  whoosh(12.4); popS(12.55, 420, 0.4); noise(12.75, 0.3, 500, 2500, 0.2); thud(13.05, 0.9);
-  const chord = (t, freqs, d, vol) => freqs.forEach((f) => { tone(t, f, f, d, vol, "triangle"); tone(t, f * 2, f * 2, d * 0.6, vol * 0.25, "sine"); });
-  chord(13.12, [784, 988], 0.16, 0.16); chord(13.32, [1047, 1319, 1568], 1.3, 0.14);
-  for (let i = 0; i < 10; i++) tone(13.3 + i * 0.07, 2400 + (i * 397) % 1800, 2400 + (i * 397) % 1800, 0.18, 0.05);
-  popS(14.2, 650, 0.3);
+  whoosh(15.4); popS(15.55, 420, 0.35); noise(15.75, 0.3, 500, 2500, 0.18); thud(16.05, 0.8);
+  const chord = (t, freqs, d, vol) => freqs.forEach((f, k) => { tone(t, f, f, d, vol, "triangle", (k - 1) * 0.25); tone(t, f * 2, f * 2, d * 0.6, vol * 0.25, "sine"); });
+  chord(16.12, [784, 988], 0.16, 0.14); chord(16.32, [1047, 1319, 1568], 1.4, 0.12);
+  for (let i = 0; i < 12; i++) tone(16.3 + i * 0.07, 2400 + (i * 397) % 1800, 2400 + (i * 397) % 1800, 0.18, 0.04, "sine", ((i * 7) % 5 - 2) / 3);
+  popS(17.3, 650, 0.25);
   const buf = await ctx.startRendering();
-  // WAV 16 bits stéréo en base64
   const n = buf.length, out = new DataView(new ArrayBuffer(44 + n * 4)), L = buf.getChannelData(0), R = buf.getChannelData(1);
-  const ws = (o, s) => [...s].forEach((c, i) => out.setUint8(o + i, c.charCodeAt(0)));
+  const ws = (o, str) => [...str].forEach((c, i) => out.setUint8(o + i, c.charCodeAt(0)));
   ws(0, "RIFF"); out.setUint32(4, 36 + n * 4, true); ws(8, "WAVEfmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
   out.setUint32(24, SR, true); out.setUint32(28, SR * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true); ws(36, "data"); out.setUint32(40, n * 4, true);
   for (let i = 0; i < n; i++) { out.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i])) * 32767, true); out.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i])) * 32767, true); }
