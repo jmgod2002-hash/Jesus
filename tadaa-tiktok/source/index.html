@@ -69,10 +69,10 @@ const blink = (t, at) => { const x = (t - at) / 0.18; return x <= 0 || x >= 1 ? 
 // ───────── couches : chaque scène ouvre son fond en cercle, précédé d'un anneau clair ─────────
 const SCENES = [
   { start: 0, color: "var(--violet)", from: [540, 960] },
-  { start: 2.8, color: "var(--orange)", from: [540, 1500], ring: "rgba(255,255,255,.35)" },
-  { start: 6.0, color: "var(--creme)", from: [880, 260], ring: "var(--orange)" },
-  { start: 12.2, color: "var(--violet)", from: [160, 1650], ring: "rgba(255,243,230,.5)" },
-  { start: 15.4, color: "var(--orange)", from: [540, 700], ring: "rgba(255,255,255,.4)" },
+  { start: 2.0, color: "var(--orange)", from: [540, 1500], ring: "rgba(255,255,255,.35)" },
+  { start: 5.0, color: "var(--creme)", from: [880, 260], ring: "var(--orange)" },
+  { start: 10.6, color: "var(--violet)", from: [160, 1650], ring: "rgba(255,243,230,.5)" },
+  { start: 14.1, color: "var(--orange)", from: [540, 700], ring: "rgba(255,255,255,.4)" },
 ];
 SCENES.forEach((sc, i) => {
   const R = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(x - sc.from[0], y - sc.from[1]))) + 10;
@@ -204,7 +204,7 @@ window.seek = (t) => {
     // caméra : légère avancée continue, entrée douce, sortie en zoom
     const inK = i === 0 ? 1 : outCubic(pr(t, sc.start + 0.1, 0.5)), outK = next ? inCubic(pr(t, next.start, 0.5)) : 0;
     const z = (0.94 + 0.06 * inK) * (1 + 0.025 * pr(t, sc.start, sc.end - sc.start)) * (1 + 0.12 * outK);
-    const shake = i === 1 && t > 4.55 && t < 4.95 ? Math.sin(t * 95) * 16 * Math.exp(-(t - 4.55) * 9) : 0;
+    const shake = i === 1 && t > 4.05 && t < 4.45 ? Math.sin(t * 95) * 16 * Math.exp(-(t - 4.05) * 9) : 0;
     sc.c.style.transform = `translate(${shake}px, ${shake * 0.5}px) scale(${z})`;
     sc.c.style.opacity = i === 0 ? 1 : Math.min(inK, 1 - outK);
   });
@@ -212,84 +212,84 @@ window.seek = (t) => {
   // 1 — accroche (le premier mot est déjà en place dès la première image)
   floatDeco(decoV1, t);
   place(s1a, { y: 470, s: spring(t, -0.12), r: -8 * (1 - outCubic(pr(t, -0.12, 0.45))) });
-  place(s1b, { y: 640, s: spring(t, 0.3), r: 6 * (1 - outCubic(pr(t, 0.3, 0.45))) });
-  place(s1c, { y: 840, s: spring(t, 0.65), r: lerp(-10, -3, outCubic(pr(t, 0.65, 0.5))) + Math.sin((t - 1.2) * 4) * 1.5 * pr(t, 1.2, 0.5) });
-  const rise = spring(t, 0.5, 1.4, 6.5);
-  place(m1, { y: lerp(2300, 1480, rise) + Math.sin(t * 2.2) * 8 * pr(t, 1.3, 0.5), r: 6 + Math.sin(t * 2.6) * 2.5, org: "50% 100%", sy: squash(t, 0.85, 0.1), sx: 2 - squash(t, 0.85, 0.1) });
-  const open1 = t < 1.1 ? 0.06 : lerp(0.06, 1, outBack(pr(t, 1.1, 0.2), 2.5));
-  m1.eye(open1 * blink(t, 2.2), keys(t, [[1.25, 0], [1.55, -40]]), keys(t, [[1.25, 0], [1.55, -46]]));
+  place(s1b, { y: 640, s: spring(t, 0.5), r: 6 * (1 - outCubic(pr(t, 0.5, 0.45))) });
+  place(s1c, { y: 840, s: spring(t, 0.85), r: lerp(-10, -3, outCubic(pr(t, 0.85, 0.5))) + Math.sin((t - 1.4) * 4) * 1.5 * pr(t, 1.4, 0.5) });
+  const rise = spring(t, 0.6, 1.4, 6.5);
+  place(m1, { y: lerp(2300, 1480, rise) + Math.sin(t * 2.2) * 8 * pr(t, 1.4, 0.5), r: 6 + Math.sin(t * 2.6) * 2.5, org: "50% 100%", sy: squash(t, 0.95, 0.1), sx: 2 - squash(t, 0.95, 0.1) });
+  const open1 = t < 1.15 ? 0.06 : lerp(0.06, 1, outBack(pr(t, 1.15, 0.2), 2.5));
+  m1.eye(open1, keys(t, [[1.3, 0], [1.6, -40]]), keys(t, [[1.3, 0], [1.6, -46]]));
 
   // 2 — problème → on s'en occupe
   floatDeco(decoO2, t);
-  place(s2a, { y: 520, s: spring(t, 3.0) * lerp(1, 0.92, outCubic(pr(t, 3.85, 0.3))), o: lerp(1, 0.5, pr(t, 3.85, 0.3)) });
-  place(s2b, { y: 700, s: spring(t, 3.4) * lerp(1, 0.92, outCubic(pr(t, 4.0, 0.3))), o: lerp(1, 0.5, pr(t, 4.0, 0.3)) });
-  place(s2sa, { y: 528, r: -3, o: t > 3.82 ? 1 : 0 }); s2sa.firstChild.style.transform = `scaleX(${outQuint(pr(t, 3.82, 0.28))})`;
-  place(s2sb, { y: 708, r: 3, o: t > 3.98 ? 1 : 0 }); s2sb.firstChild.style.transform = `scaleX(${outQuint(pr(t, 3.98, 0.28))})`;
-  const st = pr(t, 4.35, 0.2);
-  place(s2st, { y: 1010, s: t < 4.35 ? 0 : st < 1 ? lerp(2.4, 1, inCubic(st)) : squash(t, 4.55, 0.08, 3, 7), r: -5 + Math.sin((t - 4.8) * 3) * 1.5 * pr(t, 4.8, 0.5), o: outCubic(st) });
-  const rk = pr(t, 4.55, 0.6);
-  place(ring2, { y: 1010, s: lerp(0.6, 1.5, outCubic(rk)), o: t < 4.55 ? 0 : 1 - rk });
+  place(s2a, { y: 520, s: spring(t, 2.2) * lerp(1, 0.92, outCubic(pr(t, 3.5, 0.3))), o: lerp(1, 0.5, pr(t, 3.5, 0.3)) });
+  place(s2b, { y: 700, s: spring(t, 3.0) * lerp(1, 0.92, outCubic(pr(t, 3.66, 0.3))), o: lerp(1, 0.5, pr(t, 3.66, 0.3)) });
+  place(s2sa, { y: 528, r: -3, o: t > 3.47 ? 1 : 0 }); s2sa.firstChild.style.transform = `scaleX(${outQuint(pr(t, 3.47, 0.28))})`;
+  place(s2sb, { y: 708, r: 3, o: t > 3.63 ? 1 : 0 }); s2sb.firstChild.style.transform = `scaleX(${outQuint(pr(t, 3.63, 0.28))})`;
+  const st = pr(t, 3.85, 0.2);
+  place(s2st, { y: 1010, s: t < 3.85 ? 0 : st < 1 ? lerp(2.4, 1, inCubic(st)) : squash(t, 4.05, 0.08, 3, 7), r: -5 + Math.sin((t - 4.3) * 3) * 1.5 * pr(t, 4.3, 0.5), o: outCubic(st) });
+  const rk = pr(t, 4.05, 0.6);
+  place(ring2, { y: 1010, s: lerp(0.6, 1.5, outCubic(rk)), o: t < 4.05 ? 0 : 1 - rk });
 
   // 3 — comment ça marche
   floatDeco(decoC3, t);
-  place(s3t, { y: 220, s: spring(t, 6.2) });
+  place(s3t, { y: 220, s: spring(t, 5.2) });
   // épingle Chine : tombe, s'écrase au sol, ombre qui grandit
-  const pinY = t < 6.45 ? -200 : lerp(-200, 410, Math.min(1, inCubic(pr(t, 6.45, 0.32))));
-  const pinSq = squash(t, 6.77, 0.25, 2.8, 8);
-  place(pinCN, { x: 770, y: pinY, org: "50% 100%", sy: pinSq, sx: 2 - pinSq, o: t < 6.45 ? 0 : 1 });
-  place(pinShadow, { x: 770, y: 487, s: lerp(0.2, 1, pr(t, 6.45, 0.32)), o: t < 6.45 ? 0 : 1 });
-  place(labelCN, { x: 770, y: 525, s: spring(t, 6.85) });
-  place(island, { x: 330, y: 800, s: spring(t, 6.75, 1.6, 7), r: -12 * (1 - outCubic(pr(t, 6.75, 0.6))) + Math.sin(t * 1.4) * 1.2 });
-  place(labelMG, { x: 300, y: 1085, s: spring(t, 6.95) });
+  const pinY = t < 5.45 ? -200 : lerp(-200, 410, Math.min(1, inCubic(pr(t, 5.45, 0.32))));
+  const pinSq = squash(t, 5.77, 0.25, 2.8, 8);
+  place(pinCN, { x: 770, y: pinY, org: "50% 100%", sy: pinSq, sx: 2 - pinSq, o: t < 5.45 ? 0 : 1 });
+  place(pinShadow, { x: 770, y: 487, s: lerp(0.2, 1, pr(t, 5.45, 0.32)), o: t < 5.45 ? 0 : 1 });
+  place(labelCN, { x: 770, y: 525, s: spring(t, 5.85) });
+  place(island, { x: 330, y: 800, s: spring(t, 5.7, 1.6, 7), r: -12 * (1 - outCubic(pr(t, 5.7, 0.6))) + Math.sin(t * 1.4) * 1.2 });
+  place(labelMG, { x: 300, y: 1085, s: spring(t, 5.9) });
   // vol : le colis rejoint l'avion, l'avion trace la route en grossissant puis se pose
-  const fly = inOut(pr(t, 8.5, 1.6)), head = routeAt(fly);
+  const fly = inOut(pr(t, 7.95, 1.5)), head = routeAt(fly);
   let dpath = "M770 500"; for (let i = 1; i <= 60; i++) { const q = routeAt(fly * i / 60); dpath += ` L${q.x.toFixed(1)} ${q.y.toFixed(1)}`; }
   map.querySelector("#trailMask").setAttribute("d", fly > 0 ? dpath : "M0 0");
-  const pS = t < 8.3 ? 0 : t < 10.1 ? spring(t, 8.3, 2, 9) * (1 + 0.28 * Math.sin(Math.PI * fly)) : 1 - outCubic(pr(t, 10.1, 0.2));
+  const pS = t < 7.75 ? 0 : t < 9.45 ? spring(t, 7.75, 2, 9) * (1 + 0.28 * Math.sin(Math.PI * fly)) : 1 - outCubic(pr(t, 9.45, 0.2));
   place(plane, { x: head.x, y: head.y + Math.sin(t * 9) * 4 * Math.sin(Math.PI * fly), r: head.ang + 10 * Math.sin(Math.PI * fly * 2), s: pS });
-  puffs.forEach((p, i) => { const u = fly - (i + 1) * 0.06, age = pr(t, 8.5 + (u > 0 ? u * 1.6 : 0), 0.6); const q = routeAt(u);
-    place(p, { x: q.x, y: q.y, s: u > 0 && t < 10.6 ? lerp(1, 0.2, age) * Math.min(1, fly * 6) : 0, o: lerp(1, 0, age) }); });
-  if (t < 8.4) place(box, { x: 905, y: 440, s: spring(t, 7.8), r: Math.sin(t * 5) * 4 });
-  else if (t < 8.75) { const k = inOut(pr(t, 8.4, 0.35)); place(box, { x: lerp(905, 770, k), y: lerp(440, 500, k), s: lerp(1, 0, k), r: lerp(0, 30, k) }); }
-  else { const dropK = inCubic(pr(t, 10.15, 0.25)), bs = squash(t, 10.4, 0.25, 2.6, 8);
-    place(box, { x: 345, y: lerp(480, 800, dropK), org: "50% 100%", s: t < 10.15 ? 0 : 1, sy: bs, sx: 2 - bs, r: lerp(-18, 0, dropK) }); }
-  const b = pr(t, 10.4, 0.45);
-  place(burst, { x: 345, y: 850, s: lerp(0.7, 1.5, outCubic(b)), o: t < 10.4 ? 0 : 1 - b });
-  const rp = pr(t, 10.4, 0.8);
-  place(ripple, { x: 345, y: 840, s: lerp(0.3, 1.4, outCubic(rp)), o: t < 10.4 ? 0 : 1 - rp });
-  [6.9, 7.8, 10.35].forEach((a, i) => { const k = outQuint(pr(t, a, 0.55));
+  puffs.forEach((p, i) => { const u = fly - (i + 1) * 0.06, age = pr(t, 7.95 + (u > 0 ? u * 1.5 : 0), 0.6); const q = routeAt(u);
+    place(p, { x: q.x, y: q.y, s: u > 0 && t < 10.0 ? lerp(1, 0.2, age) * Math.min(1, fly * 6) : 0, o: lerp(1, 0, age) }); });
+  if (t < 7.85) place(box, { x: 905, y: 440, s: spring(t, 7.25), r: Math.sin(t * 5) * 4 });
+  else if (t < 8.2) { const k = inOut(pr(t, 7.85, 0.35)); place(box, { x: lerp(905, 770, k), y: lerp(440, 500, k), s: lerp(1, 0, k), r: lerp(0, 30, k) }); }
+  else { const dropK = inCubic(pr(t, 9.42, 0.25)), bs = squash(t, 9.67, 0.25, 2.6, 8);
+    place(box, { x: 345, y: lerp(480, 800, dropK), org: "50% 100%", s: t < 9.42 ? 0 : 1, sy: bs, sx: 2 - bs, r: lerp(-18, 0, dropK) }); }
+  const b = pr(t, 9.67, 0.45);
+  place(burst, { x: 345, y: 850, s: lerp(0.7, 1.5, outCubic(b)), o: t < 9.67 ? 0 : 1 - b });
+  const rp = pr(t, 9.67, 0.8);
+  place(ripple, { x: 345, y: 840, s: lerp(0.3, 1.4, outCubic(rp)), o: t < 9.67 ? 0 : 1 - rp });
+  [5.95, 7.25, 9.05].forEach((a, i) => { const k = outQuint(pr(t, a, 0.55));
     place(steps[i], { x: 540 + lerp(-120, 0, k), y: 1240 + i * 128, o: outCubic(pr(t, a, 0.3)) });
     const ns = spring(t, a, 1.8, 7); steps[i].num.style.transform = `scale(${ns}) rotate(${(1 - k) * -90}deg)`; });
 
   // 4 — catégories
   floatDeco(decoV4, t);
-  place(s4a, { y: 300, s: spring(t, 12.35) });
-  place(s4b, { y: 420, s: spring(t, 12.5) });
-  cards.forEach((c, i) => { const a = 12.65 + i * 0.09, fall = inCubic(pr(t, a, 0.28)), land = a + 0.28, cs = squash(t, land, 0.18, 2.6, 8);
+  place(s4a, { y: 300, s: spring(t, 10.75) });
+  place(s4b, { y: 420, s: spring(t, 11.8) });
+  cards.forEach((c, i) => { const a = [10.7, 10.82, 11.33, 11.45, 11.78, 12.32][i], fall = inCubic(pr(t, a, 0.28)), land = a + 0.28, cs = squash(t, land, 0.18, 2.6, 8);
     const x = [235, 540, 845][i % 3], y = (i < 3 ? 690 : 1000);
     place(c, { x, y: t < a ? -300 : lerp(y - 520, y, fall) + Math.sin(t * 2.6 + i) * 7 * pr(t, land + 0.4, 0.5), org: "50% 100%", sy: cs, sx: 2 - cs, o: t < a ? 0 : 1,
       r: lerp(i % 2 ? 18 : -18, 0, outCubic(pr(t, a, 0.5))) + Math.sin(t * 2 + i * 1.3) * 1.8 * pr(t, land, 0.5) });
     c.anim(c.q, Math.max(0, t - land)); });
-  place(s4c, { y: 1290, s: spring(t, 14.0), r: -3 + Math.sin((t - 14.4) * 3) * 1.5 * pr(t, 14.4, 0.4) });
+  place(s4c, { y: 1290, s: spring(t, 12.85), r: -3 + Math.sin((t - 13.25) * 3) * 1.5 * pr(t, 13.25, 0.4) });
 
   // 5 — Tadaa
   floatDeco(decoO5, t);
-  place(logo, { y: 650, s: spring(t, 15.55, 1.6, 7), r: Math.sin((t - 16.6) * 2) * 1.6 * pr(t, 16.6, 0.5) });
-  const drop = inCubic(pr(t, 15.75, 0.3)), sq = squash(t, 16.05, 0.2, 2.6, 7);
-  setT(lT, `translate(0 ${lerp(-1250, 0, drop)}) translate(690 1060) scale(${t < 16.05 ? 0.95 : 2 - sq} ${t < 16.05 ? 1.08 : sq}) translate(-690 -1060)`);
-  const lidOpen = (t < 16.3 ? 0.06 : lerp(0.06, 1, outBack(pr(t, 16.3, 0.2), 2.5))) * blink(t, 18.6);
+  place(logo, { y: 650, s: spring(t, 14.25, 1.6, 7), r: Math.sin((t - 15.3) * 2) * 1.6 * pr(t, 15.3, 0.5) });
+  const drop = inCubic(pr(t, 14.45, 0.3)), sq = squash(t, 14.75, 0.2, 2.6, 7);
+  setT(lT, `translate(0 ${lerp(-1250, 0, drop)}) translate(690 1060) scale(${t < 14.75 ? 0.95 : 2 - sq} ${t < 14.75 ? 1.08 : sq}) translate(-690 -1060)`);
+  const lidOpen = (t < 15.0 ? 0.06 : lerp(0.06, 1, outBack(pr(t, 15.0, 0.2), 2.5))) * blink(t, 19.1);
   setT(lLid, `translate(382 430) scale(1 ${Math.max(0.06, lidOpen)}) translate(-382 -430)`);
-  setT(lPupil, `translate(${keys(t, [[16.7, 0], [16.95, -20], [17.8, -20], [18.05, 0]])} ${keys(t, [[16.7, 0], [16.95, 30], [17.8, 30], [18.05, 0]])})`);
-  const sh = pr(t, 16.05, 0.7);
-  place(shine, { y: 650, s: lerp(0.85, 1.35, outCubic(sh)), o: t < 16.05 ? 0 : 1 - sh });
-  letters.forEach((n, i) => { const a = 16.15 + i * 0.07, k = spring(t, a, 1.7, 7);
-    place(n, { x: LX[i], y: 1150 + (1 - k) * -160 + Math.sin(t * 5 - i * 0.9) * 10 * pr(t, 17.0, 0.6), s: t < a ? 0 : lerp(0.3, 1, k), r: [-14, 10, -8, 12, -10][i] * (1 - outCubic(pr(t, a, 0.5))) }); });
-  const ct = t - 16.15;
+  setT(lPupil, `translate(${keys(t, [[15.4, 0], [15.65, -20], [17.3, -20], [17.55, 0]])} ${keys(t, [[15.4, 0], [15.65, 30], [17.3, 30], [17.55, 0]])})`);
+  const sh = pr(t, 14.75, 0.7);
+  place(shine, { y: 650, s: lerp(0.85, 1.35, outCubic(sh)), o: t < 14.75 ? 0 : 1 - sh });
+  letters.forEach((n, i) => { const a = 14.8 + i * 0.07, k = spring(t, a, 1.7, 7);
+    place(n, { x: LX[i], y: 1150 + (1 - k) * -160 + Math.sin(t * 5 - i * 0.9) * 10 * pr(t, 15.7, 0.6), s: t < a ? 0 : lerp(0.3, 1, k), r: [-14, 10, -8, 12, -10][i] * (1 - outCubic(pr(t, a, 0.5))) }); });
+  const ct = t - 14.8;
   confetti.style.visibility = ct > 0 && ct < 2.4 ? "visible" : "hidden";
   CONF.forEach((c) => { const drag = (1 - Math.exp(-2.2 * ct)) / 2.2, x = 540 + c.vx * drag, y = 1120 + c.vy * drag + 700 * ct * ct;
     setT(c.n, `translate(${x} ${y}) rotate(${c.spin * ct}) scale(${Math.cos(c.ph + ct * c.flip)} 1)`); c.n.setAttribute("opacity", 1 - cl((ct - 1.6) / 0.7)); });
-  place(s5t, { y: 1340 + lerp(50, 0, outQuint(pr(t, 16.8, 0.5))), o: outCubic(pr(t, 16.8, 0.4)) });
-  place(s5c, { y: 1470, s: spring(t, 17.3) * (1 + 0.035 * Math.sin((t - 17.9) * 6) * pr(t, 17.9, 0.4)) });
+  place(s5t, { y: 1340 + lerp(50, 0, outQuint(pr(t, 15.55, 0.5))), o: outCubic(pr(t, 15.55, 0.4)) });
+  place(s5c, { y: 1470, s: spring(t, 17.45) * (1 + 0.035 * Math.sin((t - 18.05) * 6) * pr(t, 18.05, 0.4)) });
 };
 
 // ───────── bruitages (rendus hors temps réel, volume réduit pour laisser place à la voix) ─────────
@@ -306,28 +306,28 @@ window.renderAudio = async () => {
   const whoosh = (t, d = 0.55) => noise(t - 0.12, d, 300, 3500, 0.3);
   const thud = (t, v = 0.7) => { tone(t, 160, 45, 0.25, v); noise(t, 0.08, 1200, 300, 0.2, 0.8, "lowpass"); };
   // 1
-  [[-0.05, 480], [0.3, 560], [0.65, 660]].forEach(([t, f]) => popS(Math.max(0, t), f)); noise(0.5, 0.45, 600, 1800, 0.15); popS(1.1, 900, 0.15);
+  [[-0.05, 480], [0.5, 560], [0.85, 660]].forEach(([t, f]) => popS(Math.max(0, t), f, 0.22)); noise(0.6, 0.45, 600, 1800, 0.12); popS(1.15, 900, 0.12);
   // 2
-  whoosh(2.8); popS(3.0, 520); popS(3.4, 600); noise(3.82, 0.2, 3000, 1500, 0.22, 0.7, "highpass", -0.3); noise(3.98, 0.2, 3000, 1500, 0.22, 0.7, "highpass", 0.3); thud(4.55, 0.9);
+  whoosh(2.0); popS(2.2, 520, 0.2); popS(3.0, 600, 0.2); noise(3.47, 0.2, 3000, 1500, 0.18, 0.7, "highpass", -0.3); noise(3.63, 0.2, 3000, 1500, 0.18, 0.7, "highpass", 0.3); thud(4.05, 0.8);
   // 3
-  whoosh(6.0); popS(6.2, 520); noise(6.45, 0.32, 2500, 600, 0.12); thud(6.77, 0.45); popS(6.85, 700, 0.2, 0.4); popS(6.75, 560, 0.25, -0.4); popS(6.95, 640, 0.18, -0.4);
-  [6.9, 7.8, 10.35].forEach((t, i) => tone(t, 880 * [1, 1.26, 1.5][i], 880 * [1, 1.26, 1.5][i], 0.3, 0.13, "triangle"));
-  popS(7.8, 460, 0.3, 0.4); noise(8.4, 0.3, 800, 2500, 0.12, 1, "bandpass", 0.4);
+  whoosh(5.0); popS(5.2, 520, 0.2); noise(5.45, 0.32, 2500, 600, 0.1); thud(5.77, 0.4); popS(5.85, 700, 0.15, 0.4); popS(5.7, 560, 0.2, -0.4); popS(5.9, 640, 0.15, -0.4);
+  [5.95, 7.25, 9.05].forEach((t, i) => tone(t, 880 * [1, 1.26, 1.5][i], 880 * [1, 1.26, 1.5][i], 0.3, 0.1, "triangle"));
+  popS(7.25, 460, 0.22, 0.4); noise(7.85, 0.3, 800, 2500, 0.1, 1, "bandpass", 0.4);
   { const sN = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner(); sN.buffer = noiseBuf; sN.loop = true; f.type = "bandpass"; f.Q.value = 0.9;
-    f.frequency.setValueAtTime(300, 8.4); f.frequency.linearRampToValueAtTime(1400, 9.3); f.frequency.linearRampToValueAtTime(400, 10.1);
-    g.gain.setValueAtTime(0, 8.4); g.gain.linearRampToValueAtTime(0.28, 9.2); g.gain.linearRampToValueAtTime(0, 10.15);
-    p.pan.setValueAtTime(0.5, 8.4); p.pan.linearRampToValueAtTime(-0.5, 10.1); sN.connect(f).connect(g).connect(p).connect(master); sN.start(8.4); sN.stop(10.2); }
-  thud(10.4, 0.6); popS(10.42, 820, 0.12, -0.4);
+    f.frequency.setValueAtTime(300, 7.85); f.frequency.linearRampToValueAtTime(1400, 8.7); f.frequency.linearRampToValueAtTime(400, 9.45);
+    g.gain.setValueAtTime(0, 7.85); g.gain.linearRampToValueAtTime(0.3, 8.6); g.gain.linearRampToValueAtTime(0, 9.5);
+    p.pan.setValueAtTime(0.5, 7.85); p.pan.linearRampToValueAtTime(-0.5, 9.45); sN.connect(f).connect(g).connect(p).connect(master); sN.start(7.85); sN.stop(9.55); }
+  thud(9.67, 0.55); popS(9.69, 820, 0.1, -0.4);
   // 4
-  whoosh(12.2); popS(12.35, 540); popS(12.5, 600);
-  for (let i = 0; i < 6; i++) { const t = 12.65 + i * 0.09 + 0.28; tone(t, 220 + i * 25, 90, 0.12, 0.3, "sine", [-0.4, 0, 0.4][i % 3]); popS(t, 600 + i * 70, 0.12, [-0.4, 0, 0.4][i % 3]); }
-  popS(14.0, 760);
-  // 5 — « ta-daa »
-  whoosh(15.4); popS(15.55, 420, 0.35); noise(15.75, 0.3, 500, 2500, 0.18); thud(16.05, 0.8);
+  whoosh(10.6); popS(10.75, 540, 0.18); popS(11.8, 600, 0.18);
+  [10.7, 10.82, 11.33, 11.45, 11.78, 12.32].forEach((a, i) => { const t = a + 0.28; tone(t, 220 + i * 25, 90, 0.12, 0.25, "sine", [-0.4, 0, 0.4][i % 3]); popS(t, 600 + i * 70, 0.1, [-0.4, 0, 0.4][i % 3]); });
+  popS(12.85, 760, 0.2);
+  // 5 — les notes « ta-daa » tombent sur les syllabes de la voix
+  whoosh(14.1); popS(14.25, 420, 0.3); noise(14.45, 0.3, 500, 2500, 0.15); thud(14.75, 0.7);
   const chord = (t, freqs, d, vol) => freqs.forEach((f, k) => { tone(t, f, f, d, vol, "triangle", (k - 1) * 0.25); tone(t, f * 2, f * 2, d * 0.6, vol * 0.25, "sine"); });
-  chord(16.12, [784, 988], 0.16, 0.14); chord(16.32, [1047, 1319, 1568], 1.4, 0.12);
-  for (let i = 0; i < 12; i++) tone(16.3 + i * 0.07, 2400 + (i * 397) % 1800, 2400 + (i * 397) % 1800, 0.18, 0.04, "sine", ((i * 7) % 5 - 2) / 3);
-  popS(17.3, 650, 0.25);
+  chord(14.8, [784, 988], 0.16, 0.09); chord(14.98, [1047, 1319, 1568], 1.4, 0.08);
+  for (let i = 0; i < 12; i++) tone(15.0 + i * 0.07, 2400 + (i * 397) % 1800, 2400 + (i * 397) % 1800, 0.18, 0.035, "sine", ((i * 7) % 5 - 2) / 3);
+  popS(17.45, 650, 0.2);
   const buf = await ctx.startRendering();
   const n = buf.length, out = new DataView(new ArrayBuffer(44 + n * 4)), L = buf.getChannelData(0), R = buf.getChannelData(1);
   const ws = (o, str) => [...str].forEach((c, i) => out.setUint8(o + i, c.charCodeAt(0)));
