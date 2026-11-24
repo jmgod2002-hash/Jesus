@@ -7,7 +7,7 @@
 ```
 Lancer un SaaS en 2026 sans savoir coder : le guide complet 💻
 Écris « SAAS » en commentaire si tu veux que je t'accompagne.
-#saas #entrepreneur #claude #ia #business #nocode #sideproject
+#saas #entrepreneur #claudeai #ia #business #nocode #sideproject
 ```
 
 4. **Réponds à chaque « SAAS » en message privé dans l'heure** : c'est là que se fait la vente, pas dans la publication.
